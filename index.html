@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>疾管局 QA 知識庫 ｜ 高雄市政府衛生局</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:#f5f6fa;color:#222;font-size:16px}
+
+/* ===== MARQUEE ===== */
+.marquee-bar{background:linear-gradient(90deg,#d32f2f,#e53935);color:#fff;padding:10px 0;overflow:hidden;white-space:nowrap;position:relative;z-index:200}
+.marquee-inner{display:inline-block;animation:marqueeScroll 30s linear infinite;font-size:15px;font-weight:500;letter-spacing:.5px}
+.marquee-inner span{margin-right:80px}
+@keyframes marqueeScroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+
+/* ===== HEADER ===== */
+.top-header{background:#fff;border-bottom:2px solid #e0e0e0;padding:16px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:150;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.top-header-left{display:flex;align-items:center;gap:14px}
+.logo-box{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#1976d2,#0d47a1);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 2px 8px rgba(25,118,210,.3)}
+.top-title{font-weight:900;font-size:22px;color:#1a237e;letter-spacing:1px}
+.top-sub{font-size:13px;color:#78909c;margin-top:2px}
+.admin-toggle{background:#f5f5f5;border:1px solid #ddd;border-radius:10px;padding:9px 18px;color:#666;cursor:pointer;font-size:14px;font-family:inherit;transition:all .2s}
+.admin-toggle:hover{background:#e8eaf6;color:#1a237e;border-color:#9fa8da}
+
+/* ===== LAYOUT ===== */
+.main-wrap{display:flex;min-height:calc(100vh - 120px)}
+
+/* Sidebar */
+.sidebar{width:230px;background:#fff;border-right:2px solid #e0e0e0;padding:16px 0;overflow-y:auto;position:sticky;top:68px;height:calc(100vh - 68px);flex-shrink:0}
+.sidebar-title{font-size:13px;color:#9e9e9e;font-weight:700;padding:0 20px;margin-bottom:10px;text-transform:uppercase;letter-spacing:2px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;font-size:15px;font-weight:500;color:#546e7a;border-left:4px solid transparent;transition:all .15s}
+.sidebar-item:hover{background:#f5f5f5;color:#222}
+.sidebar-item.active{background:#e8eaf6;color:#1a237e;border-left-color:#1a237e;font-weight:700}
+.sidebar-item .cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sidebar-item .cat-num{margin-left:auto;font-size:12px;color:#bbb;font-weight:400}
+.sidebar-search{padding:0 14px 14px}
+.sidebar-search input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:14px;font-family:inherit;outline:none;background:#fafafa}
+.sidebar-search input:focus{border-color:#1976d2;background:#fff}
+
+/* Content */
+.content{flex:1;padding:28px 32px;min-width:0;background:#f5f6fa}
+.content-header{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+.content-icon{font-size:44px}
+.content-title{font-size:28px;font-weight:900;color:#1a237e}
+.content-count{font-size:14px;color:#9e9e9e;margin-top:2px}
+
+/* Category Marquee */
+.cat-marquee{background:#fff3e0;border:1px solid #ffe0b2;border-radius:12px;padding:10px 18px;margin:14px 0 20px;overflow:hidden;white-space:nowrap;font-size:14px;color:#e65100;font-weight:500}
+.cat-marquee-inner{display:inline-block;animation:marqueeScroll 22s linear infinite}
+.cat-marquee-inner span{margin-right:60px}
+
+/* Subtopic tabs */
+.subtopic-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.subtopic-tab{padding:8px 18px;border-radius:20px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;font-size:14px;font-weight:500;color:#666;transition:all .15s;font-family:inherit}
+.subtopic-tab:hover{border-color:#90caf9;color:#1976d2}
+.subtopic-tab.active{background:#1a237e;border-color:#1a237e;color:#fff}
+
+/* QA Cards */
+.qa-card{background:#fff;border-radius:16px;margin-bottom:10px;border:1px solid #e8e8e8;overflow:hidden;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.qa-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+.qa-card.open{border-color:#90caf9}
+.qa-q{padding:18px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.qa-q-num{font-size:13px;font-weight:700;color:#fff;background:#1a237e;border-radius:8px;padding:3px 10px;flex-shrink:0;min-width:32px;text-align:center}
+.qa-q-text{flex:1;font-size:16px;font-weight:700;color:#263238;line-height:1.5}
+.qa-arrow{font-size:18px;color:#bbb;transition:transform .2s;flex-shrink:0}
+.qa-card.open .qa-arrow{transform:rotate(180deg);color:#1976d2}
+.qa-a{padding:0 22px 20px;padding-top:16px;border-top:1px solid #f0f0f0;font-size:15px;line-height:2;color:#444;white-space:pre-line;animation:fadeSlide .25s ease}
+.qa-a img{max-width:100%;border-radius:10px;margin:10px 0}
+.qa-a video{max-width:100%;border-radius:10px;margin:10px 0}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Search Results */
+.search-tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:8px;color:#fff;font-weight:500;margin-right:8px}
+.search-result-count{font-size:14px;color:#9e9e9e;margin-bottom:16px}
+.no-result{text-align:center;padding:60px 20px;color:#bbb;font-size:16px}
+
+/* ===== ADMIN ===== */
+.admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center}
+.admin-login-box{background:#fff;border-radius:20px;padding:48px 40px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.admin-login-box h2{font-size:24px;margin:16px 0 24px;color:#1a237e}
+.admin-login-box input{width:100%;padding:14px;border-radius:12px;border:2px solid #e0e0e0;font-size:20px;text-align:center;letter-spacing:8px;outline:none;font-family:inherit}
+.admin-login-box input:focus{border-color:#1976d2}
+.admin-login-btns{display:flex;gap:10px;margin-top:20px}
+.admin-login-btns button{flex:1;padding:13px;border-radius:12px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:600}
+
+.admin-panel{position:fixed;inset:0;background:#f5f6fa;z-index:500;overflow-y:auto}
+.admin-topbar{background:#1a237e;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.admin-topbar h2{color:#fff;font-size:18px}
+.admin-topbar button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 18px;color:#fff;cursor:pointer;font-size:13px;font-family:inherit}
+.admin-body{max-width:860px;margin:0 auto;padding:24px}
+.admin-section{background:#fff;border-radius:16px;margin-bottom:16px;border:1px solid #e8e8e8;overflow:hidden}
+.admin-section-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0;background:#fafafa}
+.admin-section-title{font-weight:700;font-size:16px;color:#1a237e}
+.admin-row{padding:12px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px}
+.admin-row:last-child{border-bottom:none}
+.admin-row-text{flex:1;font-size:14px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-row button{padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid #ddd;background:#fafafa;color:#666;font-family:inherit;transition:all .15s}
+.admin-row button:hover{background:#e8eaf6;color:#1a237e}
+.admin-row button.del{background:#fff5f5;color:#e53935;border-color:#ffcdd2}
+.admin-row button.del:hover{background:#ffebee}
+
+/* Marquee Admin */
+.marquee-admin{background:#fff;border-radius:16px;border:1px solid #e8e8e8;padding:20px;margin-bottom:16px}
+.marquee-admin h3{font-size:16px;color:#1a237e;margin-bottom:14px}
+.marquee-admin-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.marquee-admin-row input{flex:1;padding:10px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:14px;font-family:inherit;outline:none}
+.marquee-admin-row input:focus{border-color:#1976d2}
+.marquee-admin-row button{padding:10px 16px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;border:none}
+
+/* Editor modal */
+.editor-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:flex;align-items:center;justify-content:center}
+.editor-box{background:#fff;border-radius:20px;padding:32px;width:90%;max-width:600px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.editor-box h3{font-size:20px;color:#1a237e;margin-bottom:20px}
+.editor-box label{display:block;font-size:14px;font-weight:600;color:#555;margin-bottom:6px;margin-top:14px}
+.editor-box input[type=text],.editor-box textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:15px;font-family:inherit;outline:none}
+.editor-box input:focus,.editor-box textarea:focus{border-color:#1976d2}
+.editor-box textarea{min-height:160px;resize:vertical;line-height:1.8}
+.editor-box select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:15px;font-family:inherit;outline:none;background:#fff}
+.editor-btns{display:flex;gap:10px;margin-top:24px}
+.editor-btns button{flex:1;padding:13px;border-radius:12px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:600}
+.editor-media{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.editor-media button{padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid #ddd;background:#fafafa;font-family:inherit}
+
+/* Stats */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:14px;padding:20px;text-align:center;border:1px solid #e8e8e8}
+.stat-num{font-size:32px;font-weight:900;color:#1a237e}
+.stat-label{font-size:13px;color:#9e9e9e;margin-top:4px}
+
+/* Footer */
+.footer{text-align:center;padding:24px;color:#bbb;font-size:13px}
+
+/* Mobile */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main-wrap{flex-direction:column}
+  .content{padding:16px}
+  .mobile-cats{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid #e0e0e0;-webkit-overflow-scrolling:touch}
+  .mobile-cat-btn{white-space:nowrap;padding:8px 16px;border-radius:20px;border:1px solid #e0e0e0;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;flex-shrink:0}
+  .mobile-cat-btn.active{background:#1a237e;color:#fff;border-color:#1a237e}
+  .top-title{font-size:18px}
+  .content-title{font-size:22px}
+}
+@media(min-width:769px){.mobile-cats{display:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ============================================================
+//  DATA
+// ============================================================
+const DEFAULT_DATA = {
+  globalMarquee: ["📢 歡迎使用疾管局QA知識庫，如有問題請撥打防疫專線 07-723-0250"],
+  categories: [
+    { id:"dengue", name:"登革熱", icon:"🦟", color:"#e53935",
+      marquee:["🦟 登革熱防治期間，請配合室內外孳生源檢查與噴藥作業"],
+      subtopics:["常見問題","通知單說明","罰則規定","噴藥準備","請假規定","預防方式"],
+      items:[
+        {q:"什麼是登革熱？",a:"登革熱俗稱「天狗熱」或「斷骨熱」，是一種藉由病媒蚊叮咬而感染的急性傳染病。\n\n主要症狀：發燒、頭痛、後眼窩痛、肌肉痛、關節痛、出疹\n型別：Ⅰ、Ⅱ、Ⅲ、Ⅳ 四型\n潛伏期：3-14天，通常4-7天\n傳染途徑：埃及斑蚊與白線斑蚊叮咬",sub:"常見問題"},
+        {q:"收到「室內孳生源檢查通知單」(黃單) 是什麼意思？",a:"黃單是以【檢查】為主，不是噴藥。\n\n防疫人員入內檢查時若發現孑孓，才會溝通後於當日進行噴藥。建議在防疫人員到來前先檢查住家內外環境，清除積水容器。\n\n📋 可請半天公假\n📋 請於當日現場向防疫領隊申辦請假證明（每戶開立1張）\n\n若無法配合，請撥打通知單上執行單位（衛生所）電話詢問可否安排其他日期。",sub:"通知單說明"},
+        {q:"收到「緊急防治通知單」(紅單) 要做什麼準備？",a:"紅單 = 噴藥暨地毯式孳生源檢查\n藥物：合成除蟲菊精，對人體無害，但對魚蝦類有危害\n\n【噴藥前準備】\n• 關閉窗戶\n• 收拾食物、餐具，用報紙或塑膠袋覆蓋\n• 水族箱蓋住並關閉打氣機\n• 寵物移至屋外\n\n【噴藥後】\n• 等待60分鐘後戴口罩入內\n• 開窗通風至少30分鐘\n• 老年人、孕婦、氣喘患者請通風完全後再進入\n• 清理環境使用一般清潔劑即可\n\n📋 可請1天公假",sub:"噴藥準備"},
+        {q:"收到補檢查通知單（綠單）怎麼處理？",a:"綠單是針對【無法開鎖的不在戶】開立的。\n\n請直接聯繫通知單上的清潔隊約定補檢查時間。\n\n⚠ 若開立時間超過7天仍未聯繫，請留下姓名電話地址及舉發單號，協助通報。",sub:"通知單說明"},
+        {q:"不在家被強制開鎖檢查怎麼辦？",a:"依傳染病防治法第38條：\n\n衛生單位會同警察、里幹事等人員可執行強制開鎖進入屋內防治，完成後復鎖。\n\n💡 建議：\n• 將鑰匙寄放在可信任的鄰居或里長家\n• 藉由里鄰長、親友協助配合\n• 現場會有員警陪同並拍照",sub:"常見問題"},
+        {q:"不配合防疫會有什麼罰則？",a:"⚠ 依傳染病防治法：\n\n1. 拒絕孳生源清除/查核\n   → 第70條，處 3,000~15,000 元\n\n2. 拒絕配合噴藥（拒絕、規避或妨礙）\n   → 第67條，處 60,000~300,000 元\n\n3. 查獲積水容器孳生病媒蚊\n   → 第70條第1項第1款，處 1,500~15,000 元",sub:"罰則規定"},
+        {q:"收到舉發單（粉紅色）怎麼處理？",a:"【流程三階段】\n\n第一階段：現場查獲孳生病媒蚊 → 開立舉發通知書\n第二階段：收到函文 → 告知違反傳染病防治法，文到10日內可書面陳述意見\n第三階段：若未陳述或不被採納 → 收到行政裁處書及繳費單\n\n💰 繳費方式：高雄銀行、指定超商或郵局\n\n⚠ 即使事後立即清除積水，仍需依規定繳費（屬事後改善行為，不影響違規成立）",sub:"罰則規定"},
+        {q:"噴藥範圍怎麼劃定？",a:"依病例地點劃定周邊100公尺範圍：\n\n• 透天/公寓：全棟噴\n• 華廈大樓：地下室＋公共區域＋1、2樓\n• 1案例：另加案例該層及上下層\n• 2位以上確診：整棟全噴",sub:"噴藥準備"},
+        {q:"配合防疫的請假規定？",a:"依傳染病防治法第38條，配合防疫工作可請公假：\n\n📋 孳生源檢查（黃單）→ 半天公假\n📋 噴藥（紅單）→ 1天公假\n\n申請方式：當日防治現場向防疫領隊申辦（每戶以開立1張為限）\n補發：聯絡當區清潔隊",sub:"請假規定"},
+        {q:"如何預防登革熱？",a:"🏠 清除積水容器是最根本的方法：\n\n• 花瓶放小石頭，水面不超過石頭表面\n• 貯水容器加蓋密封\n• 不隨意堆放廢棄容器\n• 穿淺色長袖衣褲\n• 使用含DEET、picaridin或IR3535的防蚊藥劑\n\n🦟 埃及斑蚊吸血高峰：下午4-5點（次高峰上午9-10點）\n🦟 白線斑蚊吸血高峰：日出前後1-2小時、日落前2-3小時",sub:"預防方式"},
+        {q:"大樓地下室很多蚊子可以請衛生局來噴藥嗎？",a:"大樓公寓環境應由住戶自行管理維護。\n\n地下室蚊子多可能原因：化糞池、陰井或地面積水\n\n建議處理方式：\n1. 從根本積水問題解決\n2. 若仍需噴藥，可聯繫病媒防治業者\n3. 也可用「一桶水」滅蚊法：1碗無磷洗衣粉＋八分滿水，攪拌起泡後倒入水溝",sub:"常見問題"}
+      ]
+    },
+    { id:"measles", name:"麻疹", icon:"🔴", color:"#e65100",
+      marquee:[],
+      subtopics:["疾病介紹","接觸者處理","疫苗接種"],
+      items:[
+        {q:"什麼是麻疹？",a:"麻疹是由麻疹病毒引起的急性呼吸道傳染病。\n\n初期症狀與感冒很像：發燒、鼻炎、結膜炎（畏光、流眼淚）、咳嗽\n感染後3-4天出現紅疹\n\n傳染力非常強，可經由空氣、飛沫傳播\n即使病人已離開，該空間在2小時內仍可能有病毒",sub:"疾病介紹"},
+        {q:"麻疹的潛伏期和傳染力？",a:"潛伏期：7-18天，平均14天\n\n傳染力：\n• 出疹前後4天都具傳染力\n• 若未出疹：發燒前1天到退燒後3天\n\n⚠ 封閉空間中，即使病人已離開2小時內仍有傳染力",sub:"疾病介紹"},
+        {q:"與麻疹確診患者接觸後怎麼辦？",a:"自主健康管理18天（自最後接觸日起算）：\n\n✅ 每日早晚量體溫並記錄\n✅ 若無不適可正常生活\n✅ 應避免出入公共場所並佩戴口罩\n\n⚠ 若出現疑似症狀（發燒、出疹等）：\n→ 立即自我隔離\n→ 電話通知衛生單位安排就醫\n→ 全程佩戴口罩\n→ 避免搭乘大眾運輸",sub:"接觸者處理"},
+        {q:"哪些人容易感染麻疹？",a:"• 不曾得過麻疹或未接種疫苗者\n• 1981年以後出生的成人（疫苗抗體可能已衰退）\n\n💡 得過麻疹的人具有終身免疫力\n💡 建議1981年後出生者前往流行地區前自費接種1劑MMR",sub:"疾病介紹"},
+        {q:"嬰幼兒MMR疫苗接種時程？",a:"公費接種：\n• 出生滿12個月 → 第1劑\n• 滿5歲至入國小前 → 第2劑\n\n特殊情況：\n• 6個月以上未滿1歲嬰兒前往流行地區 → 可自費接種1劑\n  （滿12個月後仍需完成2劑公費，間隔至少28天）\n\n⚠ 避免攜帶1歲以下嬰兒前往流行地區",sub:"疫苗接種"},
+        {q:"高雄市可自費接種MMR的院所？",a:"• 高雄市立聯合醫院（鼓山區中華一路976號）07-5552565\n• 高雄市立小港醫院（小港區山明路482號）07-8036783\n• 文仁小兒科診所（左營區自由三路172號）07-3455959\n• 高雄市立大同醫院（前金區中華三路68號）07-2911101\n• 蔡瑞聲診所（新興區中正三路63號）07-2413388",sub:"疫苗接種"}
+      ]
+    },
+    { id:"flu", name:"流感", icon:"🤧", color:"#1565c0",
+      marquee:[],
+      subtopics:["疾病介紹","疫苗接種","公費對象","副作用","學校相關"],
+      items:[
+        {q:"什麼是流感？",a:"流感是由流感病毒引起的急性呼吸道感染。\n\n症狀：發燒（38°C以上）、頭痛、流鼻水、喉嚨痛、咳嗽、肌肉酸痛、疲倦\n潛伏期：1-4天\n傳染力：發病前1天至症狀出現後3-7天\n\n⚠ 高危險群可能引發肺炎、中耳炎、腦炎等嚴重併發症",sub:"疾病介紹"},
+        {q:"公費流感疫苗有哪些接種對象？",a:"• 滿6個月以上至國小入學前幼兒\n• 國小至高中/職/五專三年級學生\n• 50歲以上成人\n• 高風險慢性病人、BMI≧30、罕病及重大傷病患者\n• 孕婦及6個月內嬰兒之父母\n• 醫事及衛生防疫相關人員\n• 安養機構受照顧者及工作人員\n• 幼兒園托育人員\n• 禽畜業及動物防疫相關人員",sub:"公費對象"},
+        {q:"接種流感疫苗需要帶什麼證件？",a:"• 幼兒：兒童健康手冊＋健保卡\n• 50歲以上/慢性病人：健保卡\n• 孕婦：健保卡＋孕婦健康手冊或診斷證明\n• 6個月內嬰兒父母：健保卡＋嬰兒出生證明或戶口名簿\n• 醫事人員：健保卡＋執業登記證明\n• 衛生防疫人員：健保卡＋工作證或補接種卡",sub:"疫苗接種"},
+        {q:"流感疫苗需要付費嗎？",a:"公費對象：疫苗免費，仍需自付掛號費（0-150元不等）\n接種處置費：由政府補助\n看病順便接種：不另收接種掛號費及診察費\n非公費對象：可自費接種，費用由各院所自訂",sub:"疫苗接種"},
+        {q:"接種後保護力多久產生？持續多久？",a:"• 接種後約2週產生保護力\n• 保護力4-6個月後下降，一般不超過1年\n• 每年須接種（病毒株每年不同）\n\n保護效果：\n• 健康成人：70-90%\n• 老年人：減少50-60%嚴重併發症，減少80%死亡率",sub:"疫苗接種"},
+        {q:"流感疫苗可能的副作用？",a:"常見（通常1-2天自行恢復）：\n• 注射部位疼痛、紅腫\n• 發燒、頭痛、肌肉酸痛、噁心\n\n⚠ 若發燒超過38°C持續1天以上，應儘速就醫\n⚠ 接種後應觀察至少30分鐘\n\n嚴重副作用（極罕見）：立即型過敏反應、過敏性休克",sub:"副作用"},
+        {q:"幼兒需要接種幾劑？",a:"• 未滿9歲初次接種：2劑（間隔4週以上）\n• 過去曾接種過：今年1劑即可\n• 9歲以上：不論接種史，1劑",sub:"疫苗接種"},
+        {q:"學校流感停課標準？",a:"建議標準「325」：\n\n3天內同一班級有2名以上學生經醫師診斷感染流感 → 該班停課5天（含例假日）\n\n原因：流感潛伏期2-4天，同班3天內2人發病代表病毒可能在班上流傳",sub:"學校相關"}
+      ]
+    },
+    { id:"covid", name:"COVID-19", icon:"😷", color:"#7b1fa2",
+      marquee:[],
+      subtopics:["疫苗接種","注意事項","相關規定","聯繫窗口"],
+      items:[
+        {q:"接種COVID-19疫苗後要注意什麼？",a:"• 接種後於觀察區休息至少30分鐘\n• 可能出現：注射部位疼痛紅腫、疲倦、頭痛、肌肉痠痛、發燒\n• 發燒一般48小時內緩解，多喝水多休息\n\n⚠ 若持續發燒超過48小時、呼吸困難、心跳加速、全身紅疹\n→ 應儘速就醫並告知醫師曾接種疫苗",sub:"注意事項"},
+        {q:"接種疫苗後就不會感染了嗎？",a:"疫苗保護力並非100%，接種後仍有少數機會感染。\n\n即使完成接種，仍應遵守：\n✅ 勤洗手\n✅ 佩戴口罩\n✅ 保持社交距離",sub:"注意事項"},
+        {q:"確診死亡遺體如何處理？",a:"依衛福部函文說明：\n\nCOVID-19遺體係規定「儘速」火化，而非必須在24小時內火化。\n\n若因宗教等因素不得火化，可報請地方主管機關核准後，依傳染病防治法施行細則第14條第2項規定儘速深埋。",sub:"相關規定"},
+        {q:"疫苗接種證明如何取得？",a:"三種方式：\n\n1️⃣ 由接種院所開立「COVID-19疫苗接種紀錄卡」（中英對照）\n2️⃣ 由接種院所開立英文版診斷證明書\n3️⃣ 前往32家旅遊醫學門診，登載於國際預防接種證明書（黃皮書）\n\n💰 黃皮書費用：補證200元、加簽150元",sub:"相關規定"},
+        {q:"高雄市衛生局新冠業務聯繫窗口？",a:"【上班時間 8:00-17:30】\n• 蟲媒股（違規/檢疫所移送）：07-7230312\n• 慢性股（居家檢疫/隔離/防疫旅館）：822-0300\n• 急性股（口罩/感控/衛教）：07-7133018\n• 檢疫股（就醫安排）：724-3857\n\n【大夜班 23:00-8:00】\n07-7134000#5807（忙線可撥4914）",sub:"聯繫窗口"},
+        {q:"民眾自費檢驗COVID-19規定？",a:"適用對象：因旅外親屬事故或重病等緊急因素，需入境特定國家並附檢驗證明者\n\n申請文件：申請表、電子機票、入境原因相關文件\n\n指定醫院會在採檢48小時內提供英文版檢驗報告\n\n高雄地區：高雄長庚紀念醫院 07-731-7123",sub:"相關規定"}
+      ]
+    },
+    { id:"hepa", name:"A型肝炎", icon:"🟡", color:"#f9a825",
+      marquee:[],
+      subtopics:["疾病介紹","疫苗接種","病患處置","院所查詢"],
+      items:[
+        {q:"什麼是A型肝炎？怎麼傳染？",a:"A型肝炎是由A型肝炎病毒感染造成的肝臟疾病。\n\n傳染途徑：「糞口」感染\n病患糞便中的病毒污染食物或飲水 → 他人吃到/喝到即感染\n\n潛伏期：15-50天",sub:"疾病介紹"},
+        {q:"感染A型肝炎會怎樣？",a:"典型症狀：疲倦、厭食、發燒、黃疸、尿色變濃、上腹部疼痛\n\n✅ 年齡越小症狀越輕\n✅ 大多數會自然痊癒並產生抗體\n✅ 不會變成慢性肝炎\n⚠ 極少數會發生猛爆性肝炎",sub:"疾病介紹"},
+        {q:"A型肝炎疫苗要打幾劑？",a:"需接種2劑：\n• 第1劑 → 99.4%以上保護力\n• 6個月後接種第2劑\n• 可提供約20年保護力\n\n副作用：局部紅腫酸痛、發燒、倦怠、食慾不振\n\n幼兒常規：106年1月1日後出生，滿12個月接種2劑（間隔至少6個月）",sub:"疫苗接種"},
+        {q:"我是病患/接觸者該怎麼辦？",a:"【病患隔離措施】\n• 注意排泄物處理、手部清潔、環境消毒\n• 暫停製備食物、照護病人及照顧嬰幼兒\n• 出現黃疸後7天 或 發病後14天 → 解除隔離\n\n【接觸者】\n• 家庭成員、同住者、性伴侶\n• 最後接觸後14天內 → 完成第1劑公費A肝疫苗\n• 6個月後 → 自行前往接種第2劑（自費）",sub:"病患處置"},
+        {q:"高雄市哪裡有自費A肝疫苗？",a:"約90間醫療院所提供接種（112年5月資料）\n\n💰 自費約 1,100-2,200 元不等\n\n⚠ 接種前請務必先行預約，確定有疫苗再前往\n\n旅遊醫學門診：\n• 市立聯合醫院 07-5552565\n• 市立小港醫院 07-8036783#3205",sub:"院所查詢"},
+        {q:"環境消毒怎麼做？",a:"使用 1000-5000 ppm 漂白水消毒\n作用30分鐘後再用清水擦拭\n\n預防措施：\n• 不喝未煮沸的水\n• 不吃未煮熟的食物（尤其生貝類）\n• 飯前便後用肥皂洗手",sub:"疾病介紹"}
+      ]
+    },
+    { id:"hanta", name:"漢他病毒", icon:"🐀", color:"#6d4c41",
+      marquee:[],
+      subtopics:["疾病介紹","預防方法","環境清潔"],
+      items:[
+        {q:"什麼是漢他病毒症候群？",a:"由漢他病毒引起的人畜共通傳染病\n\n傳染媒介：帶病毒的鼠類\n傳染方式：吸入鼠類分泌物/排泄物飛沫\n分類：「漢他病毒出血熱」及「漢他病毒肺症候群」\n\n⚠ 目前沒有疫苗可預防",sub:"疾病介紹"},
+        {q:"如何預防漢他病毒？",a:"執行「三不政策」：\n\n🚫 不讓鼠來：封堵入侵途徑\n🚫 不讓鼠住：清除草叢雜物\n🚫 不讓鼠吃：妥善處理廚餘\n\n• 餐具使用後儘快清洗\n• 含食物的垃圾桶加蓋\n• 清除建物周圍草叢、雜物\n• 木質門板被鼠咬壞應加裝鐵片",sub:"預防方法"},
+        {q:"如何處理鼠類排泄物？",a:"⚠ 務必先做好防護再處理：\n\n1. 戴口罩及橡膠手套\n2. 稀釋1:10漂白水倒在排泄物上\n3. 等待30分鐘消毒\n4. 由外往內擦拭\n5. 使用拋棄式紙巾清理\n6. 垃圾袋密封丟棄\n\n⚠ 不要用拖把直接清除，避免污染其他區域",sub:"環境清潔"},
+        {q:"發現死老鼠怎麼處理？",a:"🏠 住家發現：用塑膠袋二層包裝，丟棄時告知清潔隊員送焚化爐\n\n🏙 戶外公共場域：立即電話通知轄區清潔隊，有專人處理",sub:"環境清潔"}
+      ]
+    },
+    { id:"rabies", name:"狂犬病", icon:"🐕", color:"#455a64",
+      marquee:[],
+      subtopics:["緊急處理","接種院所","疫苗時程"],
+      items:[
+        {q:"被動物咬傷怎麼辦？",a:"立即處理步驟：\n\n1️⃣ 用肥皂及大量水清洗傷口15分鐘\n2️⃣ 以優碘或70%酒精消毒\n3️⃣ 儘速前往「人用狂犬病疫苗接種服務醫院」就醫\n4️⃣ 由專業醫師評估處置\n\n⚠ 勿接觸或捕捉野生動物（包括蝙蝠）\n⚠ 每年帶家中犬貓施打狂犬病疫苗",sub:"緊急處理"},
+        {q:"高雄市狂犬病疫苗接種醫院？",a:"• 高雄市立聯合醫院（鼓山區中華一路976號）\n  上班 07-555-2565 轉2079/2122｜假日轉2123\n\n• 高雄市立小港醫院（小港區山明路482號）\n  上班 07-803-6783 轉3370｜假日轉3119\n\n• 高雄長庚紀念醫院（鳥松區大埤路123號）\n  07-731-7123 轉2204\n\n• 衛福部旗山醫院（旗山區中學路60號）\n  07-661-3811",sub:"接種院所"},
+        {q:"狂犬病疫苗接種時程？",a:"依WHO指引：4劑時程\n\n第0天、第3天、第7天、第14天 各接種1劑\n\n暴露動物限於：鼬獾、白鼻心、錢鼠（限臺東市）、蝙蝠\n\n⚠ 流浪犬貓咬傷比照家犬貓，暫不給予疫苗\n→ 觀察10日，若出現疑似症狀才給予",sub:"疫苗時程"}
+      ]
+    },
+    { id:"hiv", name:"愛滋病", icon:"🎀", color:"#c62828",
+      marquee:[],
+      subtopics:["疾病介紹","篩檢服務","預防投藥","HERO中心"],
+      items:[
+        {q:"什麼是愛滋病？怎麼傳染？",a:"愛滋病（AIDS）是由HIV病毒侵犯免疫系統引起。\n\n傳染途徑：\n• 不安全的性行為\n• 共用針具\n• 母子垂直感染\n\n✅ 不會經由未損傷皮膚傳染\n✅ 公車吊環、門窗、公廁不會傳染\n⚠ 共用牙刷、刮鬍刀有感染風險（可能出血）",sub:"疾病介紹"},
+        {q:"哪裡可以做愛滋篩檢？免費嗎？",a:"✅ 免費！可至以下地點進行具名或匿名篩檢：\n\n• 高雄市政府衛生局及各區衛生所\n• 愛滋指定醫院：民生、高醫、高榮、高雄長庚、大同、小港、義大、國左\n• 民間團體：愛滋希望協會、陽光酷兒中心\n\n空窗期約6-12週，建議危險行為後3個月接受篩檢",sub:"篩檢服務"},
+        {q:"什麼是PrEP暴露前預防性投藥？",a:"尚未感染HIV的人，每天服用抗病毒藥物來預防感染\n可降低 44-90% 感染風險\n\n適用對象：高風險行為者\n就醫方式：至愛滋指定醫院感染科門診\n\n⚠ 仍應同時使用保險套",sub:"預防投藥"},
+        {q:"暴露後緊急處理（PEP）？",a:"⚠ 事發後72小時內儘速就醫！越早服藥效果越好\n\n前往愛滋指定醫院：\n民生、高醫、高雄長庚、高榮、大同、小港、義大、國左\n\n由醫師評估用藥",sub:"預防投藥"},
+        {q:"HERO藥愛療癒復原中心服務？",a:"📍 民生醫院南棟8樓\n\n提供服務：\n• 友善性別諮商\n• 免費愛滋及性病篩檢\n• 友善醫療服務\n• PrEP/PEP投藥\n\n🕐 服務時間：中午12:00-晚間21:00\n📞 預約電話：07-751-1131#8010",sub:"HERO中心"},
+        {q:"公司可以強制員工做愛滋檢查嗎？",a:"❌ 不可以\n\n• 勞工健康檢查項目未包含愛滋檢查\n• 如需增列須經當事人同意\n• 檢查結果只能告知當事人\n• 不得通知雇主或學校\n• 雇主不得要求繳交愛滋檢驗報告",sub:"疾病介紹"}
+      ]
+    },
+    { id:"vaccine", name:"預防接種", icon:"💉", color:"#2e7d32",
+      marquee:[],
+      subtopics:["自費接種","證件補辦","公費疫苗","出國證明"],
+      items:[
+        {q:"高雄市哪裡可以接種自費疫苗？",a:"旅遊醫學門診：\n• 市立聯合醫院（鼓山區中華一路976號）07-5552565#2145\n• 市立小港醫院（小港區山明路482號）07-8036783#3460\n\n合約院所名單可至衛生局網站查詢\n\n💡 自費疫苗由院所向藥廠購買，進貨數量及費用各院所不同\n💡 建議先電話確認有無庫存",sub:"自費接種"},
+        {q:"兒童健康手冊（黃卡）遺失怎麼補辦？",a:"攜帶身分證件及戶口名簿\n→ 至戶籍地所在之衛生所申請補發",sub:"證件補辦"},
+        {q:"育齡婦女可以公費打MMR嗎？",a:"• 民國60年8月前出生 → 可公費提供1劑MMR\n• 民國60年9月後出生 → 若檢測不具德國麻疹抗體並出具陰性證明，可公費1劑\n• 外籍配偶 → 首次來台無接種證明或無抗體者，公費1劑",sub:"公費疫苗"},
+        {q:"出國留學需要英文預防接種證明？",a:"處理方式：\n\n1️⃣ 有原接種記錄 → 持記錄及影本至衛生單位開立英文證明\n2️⃣ 無記錄 → 由衛生單位依出生年次推算常規接種項目\n3️⃣ MMR/Td → 可至醫院補接種並取得英文證明\n4️⃣ 結核菌素測驗 → 因BCG呈陽性，可出示X光及說明卡",sub:"出國證明"},
+        {q:"接種疫苗需攜帶什麼證件？",a:"健保卡 ＋ 兒童健康手冊\n\n外籍人士：父母任一方需具健保身分或持有居留證",sub:"自費接種"}
+      ]
+    },
+    { id:"emergency", name:"緊急通報", icon:"📞", color:"#d84315",
+      marquee:["📞 緊急狀況請優先撥打市話，未接再改撥手機"],
+      subtopics:["聯繫電話","通報流程","關懷服務"],
+      items:[
+        {q:"防疫專線及緊急聯繫方式？",a:"📞 高雄市防疫專線：07-723-0250（24H）\n📞 衛生局總機：07-7134000\n📞 全國防疫專線：1922\n📞 全國緊急救護：119",sub:"聯繫電話"},
+        {q:"各股業務及聯繫方式？",a:"【蟲媒股】登革熱、茲卡、漢他、病媒蚊陳情\n☎ 07-7230312 / 📱 0911-651728\n\n【急性股】流感、腸病毒、麻疹、狂犬病\n☎ 07-7133018 / 📱 0972-896386\n\n【慢性股】結核病、愛滋病\n結核 ☎ 07-7230552\n愛滋 ☎ 07-7133016 / 📱 0912-195258\n\n【檢疫股】疫苗管理、新興傳染病\n☎ 07-7230513 / 📱 0972-717800",sub:"聯繫電話"},
+        {q:"緊急狀況轉知疾管處流程？",a:"【上班時間 08:30-17:30】\n告知民眾受理後會盡速處理\n→ 通報第一順位值班人員\n\n【下班-緊急狀況】如醫療院所通報重大傳染病\n→ 通報第一順位值班人員\n\n【下班-非緊急】\n• 週五晚上六點後 → 週六早上八點後通報\n• 週六日全天 → 早上八點後通報\n\n★ 優先撥打市話，未接再改撥手機",sub:"通報流程"},
+        {q:"關懷服務中心服務一覽表？",a:"總機代表號：(07)8220300\n🕐 每日 08:00-17:30（含假日）\n\n• 觀光局 07-8220300：居家檢疫民眾訂房轉銜\n• 衛生局 07-8220310：居家隔離相關及就醫需求\n• 社會局 07-8220315：居家送餐\n• 民政局 07-8220323：居家檢疫總窗口（含里幹事）\n• 環保局 07-8220332：垃圾清運\n• 勞工局 07-8220350：勞工檢疫相關",sub:"關懷服務"}
+      ]
+    },
+    { id:"zika", name:"茲卡病毒", icon:"🦠", color:"#00838f",
+      marquee:[],
+      subtopics:["防治說明"],
+      items:[
+        {q:"茲卡病毒緊急防治通知單說明",a:"收到茲卡病毒防治通知單（紅色紙）代表社區有疫情。\n\n防疫人員將前往進行孳生源檢查及緊急噴藥。\n準備方式與登革熱相同：\n• 噴藥前關閉窗戶、收拾食物\n• 養魚蝦者蓋住魚缸並關閉打氣機\n• 噴藥後1小時戴口罩入內通風\n\n⚠ 就醫提醒：近期若出現發燒、頭痛、關節痛、出疹等症狀，請儘速就醫",sub:"防治說明"}
+      ]
+    },
+    { id:"other", name:"其他傳染病", icon:"🩹", color:"#ad1457",
+      marquee:[],
+      subtopics:["傳染性紅斑症","漢他相關","環境害蟲"],
+      items:[
+        {q:"什麼是傳染性紅斑症（第五病）？",a:"由人類微小病毒B19引起的急性傳染病\n\n好發：學齡兒童\n傳染方式：飛沫或接觸傳染\n典型症狀：臉頰紅斑（像被摑掌）→ 軀幹和四肢出現網狀紅疹\n\n✅ 多數為自限性疾病，會自行痊癒",sub:"傳染性紅斑症"},
+        {q:"家中附近發現老鼠怎麼辦？",a:"漢他病毒由老鼠傳播，執行「三不政策」：\n不讓鼠來、不讓鼠住、不讓鼠吃\n\n• 留意老鼠入侵途徑\n• 妥善處理廚餘及動物飼料\n• 清除倉庫、儲藏室死角\n\n清理排泄物時：\n→ 配戴口罩及手套\n→ 稀釋漂白水消毒30分鐘後再清理\n\n⚠ 若出現發燒、出血、急性腎衰竭且有鼠類接觸史，請儘速就醫",sub:"漢他相關"},
+        {q:"家中發現很多跳蚤怎麼處理？",a:"跳蚤通常因周圍有貓狗或老鼠而孳生\n\n處理方式：\n1. 控制動物宿主，驅除野狗野貓或老鼠\n2. 清洗室內外地板（可加少許漂白水）\n3. 使用除蚤殺蟲劑噴灑出沒處（噴到微濕）\n4. 7天後重覆以上步驟（避免殘留蟲卵孵化）",sub:"環境害蟲"}
+      ]
+    }
+  ]
+};
+
+// ============================================================
+//  APP
+// ============================================================
+let data;
+try { data = JSON.parse(localStorage.getItem('cdc_qa_data')); if(!data||!data.categories) throw 0; } catch(e) { data = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+function save(){ localStorage.setItem('cdc_qa_data', JSON.stringify(data)); }
+
+let state = {
+  activeCat: 0,
+  activeSubtopic: null,
+  expandedQ: null,
+  search: '',
+  showAdmin: false,
+  adminAuth: false,
+  editorOpen: false,
+  editorMode: 'add', // add | edit
+  editorCat: 0,
+  editorIdx: -1,
+  editorQ: '',
+  editorA: '',
+  editorSub: '',
+  editorMedia: [],
+  marqueeEditorOpen: false
+};
+
+function render(){
+  const app = document.getElementById('app');
+  if(state.showAdmin && !state.adminAuth){ app.innerHTML = renderAdminLogin(); return; }
+  if(state.showAdmin && state.adminAuth){ app.innerHTML = renderAdmin(); return; }
+  app.innerHTML = renderFront();
+}
+
+// ============================================================
+//  FRONT
+// ============================================================
+function renderFront(){
+  const cat = data.categories[state.activeCat];
+  const searchResults = getSearchResults();
+  const isSearch = state.search.trim().length > 0;
+  const items = isSearch ? searchResults : getFilteredItems(cat);
+  const catMarquees = cat.marquee && cat.marquee.length > 0 ? cat.marquee : [];
+
+  return `
+  ${renderMarquee()}
+  <div class="top-header">
+    <div class="top-header-left">
+      <div class="logo-box">🏥</div>
+      <div>
+        <div class="top-title">疾管局 QA 知識庫</div>
+        <div class="top-sub">高雄市政府衛生局 疾病管制處</div>
+      </div>
+    </div>
+    <button class="admin-toggle" onclick="state.showAdmin=true;render()">⚙ 後台管理</button>
+  </div>
+
+  <!-- Mobile category bar -->
+  <div class="mobile-cats">
+    ${data.categories.map((c,i)=>`<button class="mobile-cat-btn ${i===state.activeCat?'active':''}" onclick="state.activeCat=${i};state.activeSubtopic=null;state.expandedQ=null;state.search='';render()">${c.icon} ${c.name}</button>`).join('')}
+  </div>
+
+  <div class="main-wrap">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-search">
+        <input type="text" placeholder="🔍 關鍵字搜尋..." value="${state.search}" oninput="state.search=this.value;state.expandedQ=null;render();this.focus()" id="searchInput">
+      </div>
+      <div class="sidebar-title">疾病分類</div>
+      ${data.categories.map((c,i)=>`
+        <div class="sidebar-item ${i===state.activeCat&&!isSearch?'active':''}" onclick="state.activeCat=${i};state.activeSubtopic=null;state.expandedQ=null;state.search='';render()">
+          <div class="cat-dot" style="background:${c.color}"></div>
+          ${c.icon} ${c.name}
+          <span class="cat-num">${c.items.length}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      ${isSearch ? renderSearchResults(items) : renderCategoryContent(cat, items, catMarquees)}
+    </div>
+  </div>
+  <div class="footer">高雄市政府衛生局 疾病管制處 ｜ 防疫專線 07-723-0250 ｜ 全國 1922</div>
+  `;
+}
+
+function renderMarquee(){
+  if(!data.globalMarquee || data.globalMarquee.length===0) return '';
+  const texts = data.globalMarquee.map(t=>`<span>${t}</span>`).join('');
+  return `<div class="marquee-bar"><div class="marquee-inner">${texts}${texts}</div></div>`;
+}
+
+function renderCategoryContent(cat, items, catMarquees){
+  const subtopics = cat.subtopics || [];
+  return `
+    <div class="content-header">
+      <div class="content-icon">${cat.icon}</div>
+      <div>
+        <div class="content-title" style="color:${cat.color}">${cat.name}</div>
+        <div class="content-count">${items.length} 個常見問題</div>
+      </div>
+    </div>
+
+    ${catMarquees.length>0?`<div class="cat-marquee"><div class="cat-marquee-inner">${catMarquees.map(t=>`<span>${t}</span>`).join('')}${catMarquees.map(t=>`<span>${t}</span>`).join('')}</div></div>`:''}
+
+    ${subtopics.length>0?`
+    <div class="subtopic-tabs">
+      <div class="subtopic-tab ${state.activeSubtopic===null?'active':''}" onclick="state.activeSubtopic=null;state.expandedQ=null;render()">全部</div>
+      ${subtopics.map(s=>`<div class="subtopic-tab ${state.activeSubtopic===s?'active':''}" onclick="state.activeSubtopic='${s}';state.expandedQ=null;render()">${s}</div>`).join('')}
+    </div>`:''}
+
+    ${items.length===0?'<div class="no-result">此分類目前沒有 QA 內容</div>':''}
+    ${items.map((item,i)=>`
+      <div class="qa-card ${state.expandedQ===item._idx?'open':''}">
+        <div class="qa-q" onclick="state.expandedQ=state.expandedQ===${item._idx}?null:${item._idx};render()">
+          <span class="qa-q-num" style="background:${cat.color}">${i+1}</span>
+          <span class="qa-q-text">${item.q}</span>
+          <span class="qa-arrow">▾</span>
+        </div>
+        ${state.expandedQ===item._idx?`<div class="qa-a">${formatAnswer(item.a)}</div>`:''}
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderSearchResults(items){
+  return `
+    <div class="content-header">
+      <div class="content-icon">🔍</div>
+      <div>
+        <div class="content-title">搜尋結果</div>
+        <div class="content-count">找到 ${items.length} 筆</div>
+      </div>
+    </div>
+    ${items.length===0?'<div class="no-result">找不到相關內容，請試試其他關鍵字</div>':''}
+    ${items.map((item,i)=>{
+      const cat = data.categories[item._catIdx];
+      return `
+      <div class="qa-card ${state.expandedQ===('s'+i)?'open':''}">
+        <div class="qa-q" onclick="state.expandedQ=state.expandedQ==='s${i}'?null:'s${i}';render()">
+          <span class="search-tag" style="background:${cat.color}">${cat.icon} ${cat.name}</span>
+          <span class="qa-q-text">${item.q}</span>
+          <span class="qa-arrow">▾</span>
+        </div>
+        ${state.expandedQ===('s'+i)?`<div class="qa-a">${formatAnswer(item.a)}</div>`:''}
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function formatAnswer(a){
+  // Simple formatting: convert URLs to links
+  return a.replace(/(https?:\/\/[^\s)]+)/g, '<a href="$1" target="_blank" style="color:#1976d2;word-break:break-all">$1</a>');
+}
+
+function getFilteredItems(cat){
+  let items = cat.items.map((item,i)=>({...item, _idx:i}));
+  if(state.activeSubtopic){
+    items = items.filter(it=>it.sub===state.activeSubtopic);
+  }
+  return items;
+}
+
+function getSearchResults(){
+  const term = state.search.toLowerCase().trim();
+  if(!term) return [];
+  const results = [];
+  data.categories.forEach((cat,ci)=>{
+    cat.items.forEach((item,ii)=>{
+      if(item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term)){
+        results.push({...item, _catIdx:ci, _itemIdx:ii});
+      }
+    });
+  });
+  return results;
+}
+
+// ============================================================
+//  ADMIN LOGIN
+// ============================================================
+function renderAdminLogin(){
+  return `
+  <div class="admin-overlay">
+    <div class="admin-login-box">
+      <div style="font-size:52px">🔐</div>
+      <h2>後台管理登入</h2>
+      <input type="password" id="adminPw" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')tryLogin()">
+      <div class="admin-login-btns">
+        <button style="background:#f5f5f5;border:1px solid #ddd;color:#666" onclick="state.showAdmin=false;render()">返回</button>
+        <button style="background:#1a237e;border:none;color:#fff" onclick="tryLogin()">登入</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function tryLogin(){
+  const pw = document.getElementById('adminPw').value;
+  if(pw==='1234'){ state.adminAuth=true; render(); }
+  else { alert('密碼錯誤'); }
+}
+
+// ============================================================
+//  ADMIN PANEL
+// ============================================================
+function renderAdmin(){
+  const totalQ = data.categories.reduce((s,c)=>s+c.items.length,0);
+  return `
+  <div class="admin-panel">
+    <div class="admin-topbar">
+      <h2>⚙ 後台管理</h2>
+      <div style="display:flex;gap:8px">
+        <button onclick="if(confirm('確定要重置所有資料？'))resetData()">🔄 重置資料</button>
+        <button onclick="state.showAdmin=false;state.adminAuth=false;render()">← 回前台</button>
+      </div>
+    </div>
+    <div class="admin-body">
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-num">${data.categories.length}</div><div class="stat-label">疾病分類</div></div>
+        <div class="stat-card"><div class="stat-num">${totalQ}</div><div class="stat-label">QA 總數</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#2e7d32">✓</div><div class="stat-label">系統正常</div></div>
+      </div>
+
+      <!-- MARQUEE ADMIN -->
+      <div class="marquee-admin">
+        <h3>📢 全站跑馬燈設定（最多3條）</h3>
+        ${(data.globalMarquee||[]).map((t,i)=>`
+          <div class="marquee-admin-row">
+            <input value="${t}" onchange="data.globalMarquee[${i}]=this.value;save()">
+            <button style="background:#ffebee;color:#e53935" onclick="data.globalMarquee.splice(${i},1);save();render()">✕</button>
+          </div>
+        `).join('')}
+        ${(data.globalMarquee||[]).length<3?`
+          <div class="marquee-admin-row">
+            <input placeholder="新增跑馬燈文字..." id="newGlobalMarquee">
+            <button style="background:#e8eaf6;color:#1a237e" onclick="addGlobalMarquee()">＋新增</button>
+          </div>`:''}
+      </div>
+
+      <!-- CATEGORY SECTIONS -->
+      ${data.categories.map((cat,ci)=>`
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <div class="admin-section-title">${cat.icon} ${cat.name}（${cat.items.length}題）</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm" onclick="editCatMarquee(${ci})">📢 跑馬燈</button>
+              <button class="btn btn-sm btn-primary" onclick="openEditor('add',${ci})">＋ 新增QA</button>
+            </div>
+          </div>
+          ${cat.items.map((item,ii)=>`
+            <div class="admin-row">
+              <span class="admin-row-text" style="cursor:pointer" onclick="openEditor('edit',${ci},${ii})">Q${ii+1}. ${item.q}</span>
+              <div style="display:flex;gap:4px">
+                <button onclick="openEditor('edit',${ci},${ii})">✏ 編輯</button>
+                <button class="del" onclick="if(confirm('確定刪除？')){data.categories[${ci}].items.splice(${ii},1);save();render()}">✕ 刪除</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  ${state.editorOpen ? renderEditor() : ''}
+  `;
+}
+
+function renderEditor(){
+  const cat = data.categories[state.editorCat];
+  const subtopics = cat.subtopics || [];
+  const title = state.editorMode==='add' ? '新增 QA' : '編輯 QA';
+  return `
+  <div class="editor-overlay" onclick="if(event.target===this){state.editorOpen=false;render()}">
+    <div class="editor-box">
+      <h3>${cat.icon} ${cat.name} — ${title}</h3>
+
+      <label>主題分類</label>
+      <select id="edSub" value="${state.editorSub}">
+        ${subtopics.map(s=>`<option value="${s}" ${state.editorSub===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+
+      <label>問題</label>
+      <input type="text" id="edQ" value="${escHtml(state.editorQ)}" placeholder="輸入問題...">
+
+      <label>答案</label>
+      <textarea id="edA" placeholder="輸入答案...">${escHtml(state.editorA)}</textarea>
+
+      <label>附加媒體</label>
+      <div class="editor-media">
+        <button onclick="addMediaToAnswer('image')">🖼 插入圖片網址</button>
+        <button onclick="addMediaToAnswer('video')">🎬 插入影片網址</button>
+      </div>
+
+      <div class="editor-btns">
+        <button style="background:#f5f5f5;border:1px solid #ddd;color:#666" onclick="state.editorOpen=false;render()">取消</button>
+        <button style="background:#1a237e;border:none;color:#fff" onclick="saveEditor()">💾 儲存</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function openEditor(mode, ci, ii){
+  state.editorOpen = true;
+  state.editorMode = mode;
+  state.editorCat = ci;
+  state.editorIdx = ii !== undefined ? ii : -1;
+  const cat = data.categories[ci];
+  if(mode==='edit' && ii!==undefined){
+    const item = cat.items[ii];
+    state.editorQ = item.q;
+    state.editorA = item.a;
+    state.editorSub = item.sub || (cat.subtopics?.[0]||'');
+  } else {
+    state.editorQ = '';
+    state.editorA = '';
+    state.editorSub = cat.subtopics?.[0] || '';
+  }
+  render();
+}
+
+function saveEditor(){
+  const q = document.getElementById('edQ').value.trim();
+  const a = document.getElementById('edA').value.trim();
+  const sub = document.getElementById('edSub').value;
+  if(!q||!a){ alert('問題和答案都要填喔！'); return; }
+  const cat = data.categories[state.editorCat];
+  if(state.editorMode==='add'){
+    cat.items.push({q, a, sub});
+  } else {
+    cat.items[state.editorIdx] = {q, a, sub};
+  }
+  save();
+  state.editorOpen = false;
+  render();
+}
+
+function addMediaToAnswer(type){
+  const ta = document.getElementById('edA');
+  if(type==='image'){
+    const url = prompt('請輸入圖片網址（https://...）：');
+    if(url) ta.value += `\n[圖片]${url}`;
+  } else {
+    const url = prompt('請輸入影片網址（YouTube 或直接連結）：');
+    if(url) ta.value += `\n[影片]${url}`;
+  }
+}
+
+function addGlobalMarquee(){
+  const input = document.getElementById('newGlobalMarquee');
+  const val = input.value.trim();
+  if(!val) return;
+  if(!data.globalMarquee) data.globalMarquee = [];
+  if(data.globalMarquee.length>=3){ alert('最多3條跑馬燈'); return; }
+  data.globalMarquee.push(val);
+  save(); render();
+}
+
+function editCatMarquee(ci){
+  const cat = data.categories[ci];
+  const current = (cat.marquee||[]).join('\n');
+  const input = prompt(`${cat.name} 的跑馬燈（每行一條，最多3條）：`, current);
+  if(input===null) return;
+  cat.marquee = input.split('\n').map(s=>s.trim()).filter(s=>s).slice(0,3);
+  save(); render();
+}
+
+function resetData(){
+  data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  save(); render();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+render();
+
+// Focus search after render
+const ob = new MutationObserver(()=>{
+  const si = document.getElementById('searchInput');
+  if(si && document.activeElement !== si && state.search){
+    si.focus();
+    si.setSelectionRange(si.value.length, si.value.length);
+  }
+});
+ob.observe(document.getElementById('app'), {childList:true, subtree:true});
+</script>
+</body>
+</html>
