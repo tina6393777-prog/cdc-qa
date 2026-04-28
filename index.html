@@ -3,217 +3,760 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>疾管局 QA 知識庫 ｜ 高雄市政府衛生局</title>
+<title>高雄疾管QA助手</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:#f5f6fa;color:#222;font-size:16px}
-a{color:#1565c0}
-.marquee-bar{background:linear-gradient(90deg,#c62828,#e53935);color:#fff;padding:10px 0;overflow:hidden;white-space:nowrap}
-.marquee-inner{display:inline-block;animation:mq 28s linear infinite;font-size:15px;font-weight:500;letter-spacing:.5px}
-.marquee-inner span{margin-right:80px}
-@keyframes mq{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
-.hdr{background:#fff;border-bottom:2px solid #e0e0e0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:150;box-shadow:0 1px 6px rgba(0,0,0,.05)}
-.hdr-l{display:flex;align-items:center;gap:14px}
-.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#1565c0,#0d47a1);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 2px 8px rgba(21,101,192,.25)}
-.hdr h1{font-size:22px;color:#1a237e;letter-spacing:1px;font-weight:900}
-.hdr p{font-size:12px;color:#90a4ae;margin-top:1px}
-.btn{background:#f5f5f5;border:1px solid #ddd;border-radius:10px;padding:8px 18px;color:#555;cursor:pointer;font-size:14px;font-family:inherit;transition:all .15s}
-.btn:hover{background:#e8eaf6;color:#1a237e;border-color:#9fa8da}
-.btn-p{background:#1a237e;border:none;color:#fff;font-weight:600}.btn-p:hover{background:#283593}
-.btn-d{background:#fff5f5;color:#e53935;border-color:#ffcdd2}.btn-d:hover{background:#ffebee}
-.btn-s{padding:5px 12px;font-size:12px;border-radius:8px}
-.wrap{display:flex;min-height:calc(100vh - 70px)}
-.side{width:240px;background:#fff;border-right:2px solid #e0e0e0;padding:14px 0;overflow-y:auto;position:sticky;top:68px;height:calc(100vh - 68px);flex-shrink:0}
-.side-search{padding:0 14px 14px}
-.side-search input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:14px;font-family:inherit;outline:none;background:#fafafa}
-.side-search input:focus{border-color:#1565c0;background:#fff}
-.side-label{font-size:12px;color:#bbb;font-weight:700;padding:0 20px;margin-bottom:8px;letter-spacing:2px}
-.side-item{display:flex;align-items:center;gap:10px;padding:12px 20px;cursor:pointer;font-size:15px;font-weight:500;color:#546e7a;border-left:4px solid transparent;transition:all .12s}
-.side-item:hover{background:#f5f5f5;color:#222}
-.side-item.on{background:#e8eaf6;color:#1a237e;border-left-color:#1a237e;font-weight:700}
-.side-item .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.side-item .n{margin-left:auto;font-size:12px;color:#ccc;font-weight:400}
-.cnt{flex:1;padding:28px 32px;min-width:0}
-.cnt-hdr{display:flex;align-items:center;gap:16px;margin-bottom:8px}
-.cnt-icon{font-size:46px}
-.cnt-title{font-size:28px;font-weight:900}
-.cnt-count{font-size:14px;color:#9e9e9e;margin-top:2px}
-.cm{background:#fff8e1;border:1px solid #ffe082;border-radius:12px;padding:10px 18px;margin:12px 0 20px;overflow:hidden;white-space:nowrap;font-size:14px;color:#e65100;font-weight:500}
-.cm-inner{display:inline-block;animation:mq 22s linear infinite}
-.cm-inner span{margin-right:60px}
-.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
-.tab{padding:8px 20px;border-radius:22px;border:1.5px solid #e0e0e0;background:#fff;cursor:pointer;font-size:14px;font-weight:600;color:#777;transition:all .12s;font-family:inherit}
-.tab:hover{border-color:#90caf9;color:#1565c0}
-.tab.on{background:#1a237e;border-color:#1a237e;color:#fff}
-.qa{background:#fff;border-radius:16px;margin-bottom:10px;border:1.5px solid #eaeaea;overflow:hidden;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.03)}
-.qa:hover{box-shadow:0 4px 16px rgba(0,0,0,.06)}
-.qa.open{border-color:#90caf9}
-.qq{padding:18px 22px;cursor:pointer;display:flex;align-items:center;gap:14px}
-.qq-n{font-size:13px;font-weight:700;color:#fff;border-radius:8px;padding:3px 10px;flex-shrink:0;min-width:34px;text-align:center}
-.qq-t{flex:1;font-size:16px;font-weight:700;color:#263238;line-height:1.5}
-.qq-a{font-size:18px;color:#bbb;transition:transform .2s;flex-shrink:0}
-.qa.open .qq-a{transform:rotate(180deg);color:#1565c0}
-.qa-body{padding:2px 22px 20px;border-top:1px solid #f0f0f0;font-size:15px;line-height:2;color:#444;white-space:pre-line;animation:fd .2s ease}
-.qa-body img,.qa-body video,.qa-body iframe{max-width:100%;border-radius:10px;margin:12px 0;display:block}
-@keyframes fd{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.s-tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:8px;color:#fff;font-weight:600;margin-right:8px}
-.empty{text-align:center;padding:60px 20px;color:#bbb;font-size:16px}
-.footer{text-align:center;padding:24px;color:#bbb;font-size:13px;border-top:1px solid #eee;margin-top:16px}
-.mob-cats{display:none;gap:8px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid #e0e0e0;-webkit-overflow-scrolling:touch}
-.mob-btn{white-space:nowrap;padding:8px 16px;border-radius:20px;border:1px solid #ddd;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;flex-shrink:0;font-weight:500}
-.mob-btn.on{background:#1a237e;color:#fff;border-color:#1a237e}
-@media(max-width:768px){.side{display:none}.mob-cats{display:flex!important}.cnt{padding:16px}.cnt-title{font-size:22px}.hdr h1{font-size:17px}}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center}
-.login-box{background:#fff;border-radius:24px;padding:48px 40px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.12)}
-.login-box h2{font-size:24px;margin:14px 0 22px;color:#1a237e}
-.login-box input{width:100%;padding:14px;border-radius:14px;border:2px solid #e0e0e0;font-size:22px;text-align:center;letter-spacing:8px;outline:none;font-family:inherit}
-.login-box input:focus{border-color:#1565c0}
-.login-btns{display:flex;gap:10px;margin-top:22px}
-.login-btns button{flex:1;padding:13px;border-radius:14px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;border:none}
-.adm{position:fixed;inset:0;background:#f5f6fa;z-index:500;overflow-y:auto}
-.adm-top{background:#1a237e;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-.adm-top h2{color:#fff;font-size:18px;font-weight:700}
-.adm-top button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 16px;color:#fff;cursor:pointer;font-size:13px;font-family:inherit}
-.adm-body{max-width:880px;margin:0 auto;padding:24px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.stat{background:#fff;border-radius:14px;padding:20px;text-align:center;border:1px solid #eee}
-.stat b{font-size:32px;color:#1a237e;display:block}
-.stat span{font-size:13px;color:#9e9e9e}
-.mq-admin{background:#fff;border-radius:16px;border:1px solid #eee;padding:20px;margin-bottom:16px}
-.mq-admin h3{font-size:16px;color:#1a237e;margin-bottom:12px}
-.mq-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
-.mq-row input{flex:1;padding:10px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:14px;font-family:inherit;outline:none}
-.mq-row input:focus{border-color:#1565c0}
-.sec{background:#fff;border-radius:16px;margin-bottom:14px;border:1px solid #eee;overflow:hidden}
-.sec-hdr{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f5f5f5;background:#fafafa}
-.sec-title{font-weight:700;font-size:16px;color:#1a237e}
-.sec-row{padding:11px 20px;border-bottom:1px solid #f8f8f8;display:flex;align-items:center;gap:8px}
-.sec-row:last-child{border-bottom:none}
-.sec-row-t{flex:1;font-size:14px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
-.sec-row-t:hover{color:#1a237e}
-.sec-row button{padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid #ddd;background:#fafafa;color:#666;font-family:inherit}
-.sec-row button:hover{background:#e8eaf6;color:#1a237e}
-.sec-row button.del{background:#fff5f5;color:#e53935;border-color:#ffcdd2}
-.ed-box{background:#fff;border-radius:24px;padding:32px;width:92%;max-width:620px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
-.ed-box h3{font-size:20px;color:#1a237e;margin-bottom:18px}
-.ed-box label{display:block;font-size:14px;font-weight:700;color:#555;margin-bottom:6px;margin-top:16px}
-.ed-box input[type=text],.ed-box textarea,.ed-box select{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid #e0e0e0;font-size:15px;font-family:inherit;outline:none}
-.ed-box input:focus,.ed-box textarea:focus,.ed-box select:focus{border-color:#1565c0}
-.ed-box textarea{min-height:180px;resize:vertical;line-height:1.8}
-.ed-box select{background:#fff}
-.ed-btns{display:flex;gap:10px;margin-top:24px}
-.ed-btns button{flex:1;padding:14px;border-radius:14px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;border:none}
-.ed-media{margin-top:10px;display:flex;gap:8px}
-.ed-media button{padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;border:1px solid #ddd;background:#fafafa;font-family:inherit;font-weight:500}
-.ed-media button:hover{background:#e8eaf6}
-.export-box{background:#fff;border-radius:24px;padding:32px;width:92%;max-width:680px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
-.export-box h3{font-size:20px;color:#1a237e;margin-bottom:10px}
-.export-box p{font-size:14px;color:#777;margin-bottom:16px;line-height:1.7}
-.export-box textarea{width:100%;height:300px;padding:14px;border-radius:12px;border:1.5px solid #e0e0e0;font-size:12px;font-family:'Courier New',monospace;outline:none;resize:vertical;background:#fafafa;line-height:1.5}
-.export-box textarea:focus{border-color:#1565c0}
-.export-btns{display:flex;gap:10px;margin-top:16px}
-.export-btns button{flex:1;padding:13px;border-radius:14px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;border:none}
+:root{
+  --bg:#f0f4f8;--bg2:#fff;--bg3:#f7f9fc;
+  --text:#1a1a2e;--text2:#4a5568;--text3:#718096;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --accent:#0369a1;--accent2:#0284c7;--accent-light:#e0f2fe;
+  --green:#16a34a;--red:#dc2626;--orange:#ea580c;--purple:#7c3aed;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+  --shadow2:0 4px 12px rgba(0,0,0,.1);
+  --radius:10px;--radius2:14px;
+}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* === HEADER === */
+.header{background:linear-gradient(135deg,#0c4a6e,#0369a1);color:#fff;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;flex-wrap:wrap;gap:8px}
+.header-left{display:flex;align-items:center;gap:14px}
+.logo{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:26px;backdrop-filter:blur(6px)}
+.header-info h1{font-size:20px;font-weight:700;letter-spacing:1px}
+.header-info p{font-size:12px;opacity:.85;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.header-contact{background:rgba(255,255,255,.15);border-radius:8px;padding:6px 14px;font-size:12px;backdrop-filter:blur(6px);line-height:1.6}
+.header-contact b{color:#fbbf24}
+.header-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:inherit;transition:.2s;display:flex;align-items:center;gap:5px}
+.header-btn:hover{background:rgba(255,255,255,.35)}
+.header-btn.active{background:#fbbf24;color:#0c4a6e;border-color:#fbbf24;font-weight:600}
+
+/* === SEARCH === */
+.search-bar{padding:12px 24px;background:rgba(0,0,0,.1)}
+.search-wrap{position:relative;max-width:600px;margin:0 auto}
+.search-wrap input{width:100%;padding:10px 16px 10px 40px;border:none;border-radius:10px;font-size:15px;font-family:inherit;background:rgba(255,255,255,.95);color:var(--text);outline:none}
+.search-wrap input::placeholder{color:#94a3b8}
+.search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.5}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;opacity:.5;color:var(--text)}
+
+/* === MARQUEE === */
+.marquee-bar{background:#fef3c7;color:#92400e;padding:8px 0;overflow:hidden;font-size:13px;font-weight:500;border-bottom:1px solid #fde68a}
+.marquee-inner{display:flex;animation:marqueeScroll 30s linear infinite;white-space:nowrap;gap:80px}
+.marquee-inner span{flex-shrink:0}
+@keyframes marqueeScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* === LAYOUT === */
+.main{display:flex;min-height:calc(100vh - 130px)}
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:12px 0;overflow-y:auto;flex-shrink:0}
+.content{flex:1;padding:20px 28px;overflow-y:auto;max-height:calc(100vh - 130px)}
+
+/* === SIDEBAR === */
+.cat-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:.15s;border-left:3px solid transparent;font-size:14px;position:relative}
+.cat-item:hover{background:var(--bg3)}
+.cat-item.active{background:var(--accent-light);border-left-color:var(--accent);font-weight:600}
+.cat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cat-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-count{font-size:11px;color:var(--text3);background:var(--bg);border-radius:10px;padding:1px 7px}
+.cat-drag-handle{cursor:grab;opacity:.3;font-size:14px;margin-right:2px}
+.cat-drag-handle:hover{opacity:.7}
+
+/* === SUBTOPIC TABS === */
+.subtopic-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sub-tab{padding:5px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);transition:.15s;font-family:inherit}
+.sub-tab:hover{border-color:var(--accent);color:var(--accent)}
+.sub-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* === QA CARDS === */
+.qa-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);margin-bottom:10px;overflow:hidden;transition:.15s;position:relative}
+.qa-card:hover{box-shadow:var(--shadow2);border-color:var(--border2)}
+.qa-card.dragging{opacity:.5;border:2px dashed var(--accent)}
+.qa-card.drag-over{border-top:3px solid var(--accent)}
+.qa-q{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;line-height:1.5;user-select:none}
+.qa-q:hover{background:var(--bg3)}
+.qa-q .arrow{flex-shrink:0;transition:.2s;font-size:12px;color:var(--text3)}
+.qa-q .arrow.open{transform:rotate(90deg)}
+.qa-q-text{flex:1}
+.qa-a{padding:0 16px 16px 42px;font-size:13.5px;line-height:1.8;color:var(--text2);white-space:pre-wrap;word-break:break-word}
+.qa-a a{color:var(--accent);text-decoration:underline}
+.qa-a img{max-width:100%;border-radius:8px;margin:8px 0;cursor:pointer}
+
+/* === TAGS === */
+.qa-tags{display:flex;gap:4px;flex-shrink:0}
+.tag{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;letter-spacing:.5px}
+.tag-重要{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.tag-注意{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.tag-新增{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.tag-更新{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+.tag-常用{background:#faf5ff;color:#7c3aed;border:1px solid #ddd6fe}
+
+/* === HIGHLIGHT COLORS === */
+.hl-yellow{background:#fef9c3 !important;border-left:4px solid #facc15 !important}
+.hl-green{background:#dcfce7 !important;border-left:4px solid #22c55e !important}
+.hl-blue{background:#dbeafe !important;border-left:4px solid #3b82f6 !important}
+.hl-red{background:#fee2e2 !important;border-left:4px solid #ef4444 !important}
+.hl-purple{background:#f3e8ff !important;border-left:4px solid #a855f7 !important}
+.hl-orange{background:#ffedd5 !important;border-left:4px solid #f97316 !important}
+
+/* === ADMIN TOOLS === */
+.admin-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 8px;background:rgba(0,0,0,.03);border-radius:8px;font-size:12px}
+.admin-btn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;font-family:inherit;transition:.15s;display:flex;align-items:center;gap:3px}
+.admin-btn:hover{border-color:var(--accent);color:var(--accent)}
+.admin-btn.danger{color:var(--red)}
+.admin-btn.danger:hover{border-color:var(--red);background:#fef2f2}
+.qa-drag-handle{cursor:grab;opacity:.3;font-size:14px}
+.qa-drag-handle:hover{opacity:.8}
+
+/* Color picker dots */
+.color-dots{display:flex;gap:4px;align-items:center}
+.color-dot{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s}
+.color-dot:hover{transform:scale(1.2)}
+.color-dot.active{border-color:var(--text);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--text)}
+.color-dot.none{background:var(--bg2);border:2px dashed var(--border2);position:relative}
+.color-dot.none::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3)}
+
+/* === MODAL === */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--bg2);border-radius:var(--radius2);width:100%;max-width:640px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:24px}
+.modal h3{font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal label{font-size:13px;font-weight:600;color:var(--text2);display:block;margin:12px 0 4px}
+.modal input,.modal textarea,.modal select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg2);outline:none;transition:.15s}
+.modal input:focus,.modal textarea:focus,.modal select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.modal textarea{min-height:180px;resize:vertical;line-height:1.7}
+.modal-btns{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.btn{padding:8px 20px;border-radius:8px;font-size:14px;font-family:inherit;cursor:pointer;border:1px solid var(--border);background:var(--bg2);transition:.15s}
+.btn:hover{background:var(--bg3)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent2)}
+.btn-danger{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-danger:hover{opacity:.9}
+.btn-success{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* === ICON PICKER === */
+.icon-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding:8px;background:var(--bg);border-radius:8px;margin-top:4px}
+.icon-opt{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:20px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:.15s}
+.icon-opt:hover{background:var(--accent-light)}
+.icon-opt.active{border-color:var(--accent);background:var(--accent-light)}
+
+/* === TAG PICKER === */
+.tag-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tag-opt{padding:4px 12px;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid var(--border);transition:.15s;font-family:inherit}
+.tag-opt:hover{border-color:var(--accent)}
+.tag-opt.active{font-weight:700}
+
+/* === EXPORT PANEL === */
+.export-box{max-width:700px}
+.export-box textarea{width:100%;height:300px;font-family:'Consolas','Courier New',monospace;font-size:12px;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);resize:vertical}
+
+/* === SEARCH RESULTS === */
+.search-result-cat{font-size:11px;color:var(--accent);font-weight:600;margin-top:4px}
+
+/* === EMPTY STATE === */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty .big-icon{font-size:48px;margin-bottom:12px}
+
+/* === RESPONSIVE === */
+@media(max-width:768px){
+  .sidebar{width:180px}
+  .content{padding:14px}
+  .header-top{padding:10px 14px}
+  .header-contact{display:none}
+}
+@media(max-width:600px){
+  .main{flex-direction:column}
+  .sidebar{width:100%;max-height:50vh;border-right:none;border-bottom:1px solid var(--border)}
+  .content{max-height:none}
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
+
 <script src="data.js"></script>
 <script>
-let D=JSON.parse(JSON.stringify(QA_DATA));
-let S={cat:0,sub:null,q:null,search:'',showAdmin:false,auth:false,edOpen:false,edMode:'add',edCat:0,edIdx:-1,edQ:'',edA:'',edSub:'',exportOpen:false};
-function R(){document.getElementById('app').innerHTML=S.showAdmin?(S.auth?adminPanel():adminLogin()):front()}
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function fmt(a){
-  // Keep HTML tags for img/video/iframe, escape the rest
-  let safe=a.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // Restore allowed tags
-  safe=safe.replace(/&lt;(\/?)img(\s[^&]*?)?&gt;/gi,'<$1img$2>');
-  safe=safe.replace(/&lt;(\/?)video(\s[^&]*?)?&gt;/gi,'<$1video$2>');
-  safe=safe.replace(/&lt;(\/?)iframe(\s[^&]*?)?&gt;/gi,'<$1iframe$2>');
-  // URLs to links
-  safe=safe.replace(/(https?:\/\/[^\s<)]+)/g,'<a href="$1" target="_blank">$1</a>');
-  return safe;
+// ============================================================
+//  STATE
+// ============================================================
+let D, S = {
+  cat: 0, sub: null, q: null, search: '',
+  admin: false, adminPw: false,
+  modal: null, // 'editQA','addQA','editCat','addCat','export','catManager'
+  modalData: {},
+  dragQA: null, dragCat: null
+};
+
+function load(){
+  try {
+    const s = localStorage.getItem('kaohsiung_cdc_qa_v3');
+    if(s) { D = JSON.parse(s); return; }
+  } catch(e){}
+  D = JSON.parse(JSON.stringify(QA_DATA));
 }
-function getItems(c){let it=c.items.map((x,i)=>({...x,_i:i}));if(S.sub)it=it.filter(x=>x.sub===S.sub);return it}
-function sResults(){let t=S.search.toLowerCase().trim();if(!t)return[];let r=[];D.categories.forEach((c,ci)=>c.items.forEach((x,xi)=>{if(x.q.toLowerCase().includes(t)||x.a.toLowerCase().includes(t))r.push({...x,_ci:ci,_xi:xi})}));return r}
+function save(){ localStorage.setItem('kaohsiung_cdc_qa_v3', JSON.stringify(D)); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function front(){
-  let c=D.categories[S.cat],isS=S.search.trim().length>0,its=isS?sResults():getItems(c),cm=c.marquee||[];
-  return`${D.globalMarquee&&D.globalMarquee.length?`<div class="marquee-bar"><div class="marquee-inner">${D.globalMarquee.map(t=>'<span>'+t+'</span>').join('')}${D.globalMarquee.map(t=>'<span>'+t+'</span>').join('')}</div></div>`:''}
-<div class="hdr"><div class="hdr-l"><div class="logo">🏥</div><div><h1>疾管局 QA 知識庫</h1><p>高雄市政府衛生局 疾病管制處</p></div></div><button class="btn" onclick="S.showAdmin=true;R()">⚙ 後台管理</button></div>
-<div class="mob-cats">${D.categories.map((x,i)=>`<button class="mob-btn ${i===S.cat&&!isS?'on':''}" onclick="S.cat=${i};S.sub=null;S.q=null;S.search='';R()">${x.icon} ${x.name}</button>`).join('')}</div>
-<div class="wrap"><div class="side"><div class="side-search"><input placeholder="🔍 關鍵字搜尋..." value="${esc(S.search)}" oninput="S.search=this.value;S.q=null;R()" id="si"></div><div class="side-label">疾病分類</div>${D.categories.map((x,i)=>`<div class="side-item ${i===S.cat&&!isS?'on':''}" onclick="S.cat=${i};S.sub=null;S.q=null;S.search='';R()"><div class="dot" style="background:${x.color}"></div>${x.icon} ${x.name}<span class="n">${x.items.length}</span></div>`).join('')}</div>
-<div class="cnt">${isS?searchV(its):catV(c,its,cm)}</div></div>
-<div class="footer">高雄市政府衛生局 疾病管制處 ｜ 防疫專線 07-723-0250 ｜ 全國 1922</div>`}
+load();
 
-function catV(c,its,cm){
-  return`<div class="cnt-hdr"><div class="cnt-icon">${c.icon}</div><div><div class="cnt-title" style="color:${c.color}">${c.name}</div><div class="cnt-count">${its.length} 個常見問題</div></div></div>
-${cm.length?`<div class="cm"><div class="cm-inner">${cm.map(t=>'<span>'+t+'</span>').join('')}${cm.map(t=>'<span>'+t+'</span>').join('')}</div></div>`:''}
-${(c.subtopics||[]).length?`<div class="tabs"><div class="tab ${S.sub===null?'on':''}" onclick="S.sub=null;S.q=null;R()">全部</div>${c.subtopics.map(s=>`<div class="tab ${S.sub===s?'on':''}" onclick="S.sub='${s}';S.q=null;R()">${s}</div>`).join('')}</div>`:''}
-${its.length===0?'<div class="empty">此分類目前沒有 QA 內容</div>':''}
-${its.map((x,i)=>`<div class="qa ${S.q===x._i?'open':''}"><div class="qq" onclick="S.q=S.q===${x._i}?null:${x._i};R()"><span class="qq-n" style="background:${c.color}">${i+1}</span><span class="qq-t">${x.q}</span><span class="qq-a">▾</span></div>${S.q===x._i?`<div class="qa-body">${fmt(x.a)}</div>`:''}</div>`).join('')}`}
+// ============================================================
+//  RENDER
+// ============================================================
+function R(){
+  const app = document.getElementById('app');
+  let h = '';
 
-function searchV(its){
-  return`<div class="cnt-hdr"><div class="cnt-icon">🔍</div><div><div class="cnt-title">搜尋結果</div><div class="cnt-count">找到 ${its.length} 筆</div></div></div>
-${its.length===0?'<div class="empty">找不到相關內容，請試試其他關鍵字</div>':''}
-${its.map((x,i)=>{let c=D.categories[x._ci];return`<div class="qa ${S.q===('s'+i)?'open':''}"><div class="qq" onclick="S.q=S.q==='s${i}'?null:'s${i}';R()"><span class="s-tag" style="background:${c.color}">${c.icon} ${c.name}</span><span class="qq-t">${x.q}</span><span class="qq-a">▾</span></div>${S.q===('s'+i)?`<div class="qa-body">${fmt(x.a)}</div>`:''}</div>`}).join('')}`}
+  // --- HEADER ---
+  h += `<div class="header">
+    <div class="header-top">
+      <div class="header-left">
+        <div class="logo">🏥</div>
+        <div class="header-info">
+          <h1>高雄疾管QA助手</h1>
+          <p>高雄市政府衛生局 疾病管制處</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-contact">
+          <b>📞 防疫專線</b> 07-723-0250（24H）<br>
+          <b>🕐 服務時間</b> 週一至週五 08:30-17:30
+        </div>`;
+  if(S.admin){
+    h += `<button class="header-btn" onclick="openModal('addQA')">＋ 新增QA</button>`;
+    h += `<button class="header-btn" onclick="openModal('catManager')">📂 類別管理</button>`;
+    h += `<button class="header-btn" onclick="doExport()">📥 匯出DATA</button>`;
+    h += `<button class="header-btn active" onclick="toggleAdmin()">🔓 管理中</button>`;
+  } else {
+    h += `<button class="header-btn" onclick="toggleAdmin()">🔒 後台</button>`;
+  }
+  h += `</div></div>`;
 
-function adminLogin(){return`<div class="ov"><div class="login-box"><div style="font-size:52px">🔐</div><h2>後台管理登入</h2><input type="password" id="pw" placeholder="密碼" onkeydown="if(event.key==='Enter')doLogin()"><div class="login-btns"><button style="background:#f5f5f5;color:#666" onclick="S.showAdmin=false;R()">返回</button><button style="background:#1a237e;color:#fff" onclick="doLogin()">登入</button></div></div></div>`}
-function doLogin(){if(document.getElementById('pw').value==='1234'){S.auth=true;R()}else alert('密碼錯誤')}
+  // --- SEARCH ---
+  h += `<div class="search-bar"><div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="si" type="text" placeholder="輸入關鍵字搜尋所有QA..." value="${esc(S.search)}" oninput="doSearch(this.value)" onkeydown="if(event.key==='Escape'){doSearch('');this.blur()}">
+    ${S.search ? '<button class="search-clear" onclick="doSearch(\'\')">✕</button>' : ''}
+  </div></div>`;
 
-function adminPanel(){
-  let total=D.categories.reduce((s,c)=>s+c.items.length,0);
-  return`<div class="adm"><div class="adm-top"><h2>⚙ 後台管理</h2><div style="display:flex;gap:8px"><button onclick="S.exportOpen=true;R()">📥 匯出 data.js</button><button onclick="S.showAdmin=false;S.auth=false;R()">← 回前台</button></div></div>
-<div class="adm-body"><div class="stats"><div class="stat"><b>${D.categories.length}</b><span>疾病分類</span></div><div class="stat"><b>${total}</b><span>QA 總數</span></div><div class="stat"><b style="color:#2e7d32">✓</b><span>系統正常</span></div></div>
-<div class="mq-admin"><h3>📢 全站跑馬燈（最多3條）</h3>${(D.globalMarquee||[]).map((t,i)=>`<div class="mq-row"><input value="${esc(t)}" onchange="D.globalMarquee[${i}]=this.value"><button class="btn btn-s btn-d" onclick="D.globalMarquee.splice(${i},1);R()">✕</button></div>`).join('')}${(D.globalMarquee||[]).length<3?`<div class="mq-row"><input placeholder="新增跑馬燈文字..." id="ngm"><button class="btn btn-s" style="background:#e8eaf6;color:#1a237e" onclick="let v=document.getElementById('ngm').value.trim();if(v){D.globalMarquee.push(v);R()}">＋ 新增</button></div>`:''}</div>
-${D.categories.map((c,ci)=>`<div class="sec"><div class="sec-hdr"><div class="sec-title">${c.icon} ${c.name}（${c.items.length}題）</div><div style="display:flex;gap:6px"><button class="btn btn-s" onclick="editCM(${ci})">📢 跑馬燈</button><button class="btn btn-s btn-p" onclick="openEd('add',${ci})">＋ 新增QA</button></div></div>${c.items.map((x,ii)=>`<div class="sec-row"><span class="sec-row-t" onclick="openEd('edit',${ci},${ii})">Q${ii+1}. ${x.q}</span><button onclick="openEd('edit',${ci},${ii})">✏</button><button class="del" onclick="if(confirm('確定刪除？')){D.categories[${ci}].items.splice(${ii},1);R()}">✕</button></div>`).join('')}</div>`).join('')}</div></div>
-${S.edOpen?editor():''}${S.exportOpen?exportPanel():''}`}
+  // --- MARQUEE ---
+  const mqs = (D.globalMarquee||[]).concat(D.categories[S.cat]?.marquee||[]);
+  if(mqs.length > 0){
+    const doubled = mqs.concat(mqs);
+    h += `<div class="marquee-bar"><div class="marquee-inner">${doubled.map(m=>`<span>${esc(m)}</span>`).join('')}</div></div>`;
+  }
 
-function editor(){
-  let c=D.categories[S.edCat],subs=c.subtopics||[];
-  return`<div class="ov" onclick="if(event.target===this){S.edOpen=false;R()}"><div class="ed-box"><h3>${c.icon} ${c.name} — ${S.edMode==='add'?'新增':'編輯'} QA</h3>
-<label>主題分類</label><select id="edSub">${subs.map(s=>`<option value="${s}"${S.edSub===s?' selected':''}>${s}</option>`).join('')}</select>
-<label>問題</label><input type="text" id="edQ" value="${esc(S.edQ)}" placeholder="輸入問題...">
-<label>答案</label><textarea id="edA" placeholder="輸入答案...">${esc(S.edA)}</textarea>
-<label>附加媒體</label><div class="ed-media"><button onclick="addMedia('img')">🖼 插入圖片網址</button><button onclick="addMedia('vid')">🎬 插入影片網址</button></div>
-<div class="ed-btns"><button style="background:#f5f5f5;color:#666" onclick="S.edOpen=false;R()">取消</button><button style="background:#1a237e;color:#fff" onclick="saveEd()">💾 儲存</button></div></div></div>`}
+  h += `</div>`; // end header
 
-function openEd(mode,ci,ii){
-  S.edOpen=true;S.edMode=mode;S.edCat=ci;S.edIdx=ii!==undefined?ii:-1;
-  let c=D.categories[ci];
-  if(mode==='edit'&&ii!==undefined){let x=c.items[ii];S.edQ=x.q;S.edA=x.a;S.edSub=x.sub||(c.subtopics?.[0]||'')}
-  else{S.edQ='';S.edA='';S.edSub=c.subtopics?.[0]||''}
-  R()}
+  // --- MAIN ---
+  h += `<div class="main">`;
 
-function saveEd(){
-  let q=document.getElementById('edQ').value.trim(),a=document.getElementById('edA').value.trim(),sub=document.getElementById('edSub').value;
-  if(!q||!a){alert('問題和答案都要填喔！');return}
-  let c=D.categories[S.edCat];
-  if(S.edMode==='add')c.items.push({q,a,sub});else c.items[S.edIdx]={q,a,sub};
-  S.edOpen=false;R()}
+  // --- SIDEBAR ---
+  h += `<div class="sidebar">`;
+  D.categories.forEach((c,ci) => {
+    const active = ci === S.cat && !S.search ? 'active' : '';
+    h += `<div class="cat-item ${active}" onclick="selectCat(${ci})" 
+      ${S.admin ? `draggable="true" ondragstart="dragCatStart(event,${ci})" ondragover="dragCatOver(event)" ondrop="dropCat(event,${ci})" ondragend="dragCatEnd()"` : ''}>`;
+    if(S.admin) h += `<span class="cat-drag-handle">⋮⋮</span>`;
+    h += `<div class="cat-icon" style="background:${c.color}20;color:${c.color}">${c.icon}</div>`;
+    h += `<span class="cat-name">${esc(c.name)}</span>`;
+    h += `<span class="cat-count">${c.items.length}</span>`;
+    h += `</div>`;
+  });
+  h += `</div>`;
 
-function addMedia(type){
-  let ta=document.getElementById('edA');
-  if(type==='img'){let u=prompt('請輸入圖片網址（https://...）：');if(u)ta.value+='\n\n<img src="'+u+'">\n'}
-  else{let u=prompt('請輸入影片網址：');if(u){if(u.includes('youtube.com')||u.includes('youtu.be')){let id=u.match(/(?:v=|\/)([\w-]{11})/);if(id)ta.value+='\n\n<iframe width="560" height="315" src="https://www.youtube.com/embed/'+id[1]+'" frameborder="0" allowfullscreen></iframe>\n'}else ta.value+='\n\n<video controls src="'+u+'"></video>\n'}}}
+  // --- CONTENT ---
+  h += `<div class="content">`;
 
-function editCM(ci){let c=D.categories[ci],cur=(c.marquee||[]).join('\n');let v=prompt(c.name+' 的跑馬燈（每行一條，最多3條）：',cur);if(v===null)return;c.marquee=v.split('\n').map(s=>s.trim()).filter(s=>s).slice(0,3);R()}
+  if(S.search.trim()){
+    // SEARCH MODE
+    h += renderSearch();
+  } else {
+    // NORMAL MODE
+    const cat = D.categories[S.cat];
+    if(!cat){
+      h += `<div class="empty"><div class="big-icon">📂</div><p>請選擇左側的類別</p></div>`;
+    } else {
+      // Subtopic tabs
+      const subs = cat.subtopics || [];
+      if(subs.length > 0){
+        h += `<div class="subtopic-tabs">`;
+        h += `<div class="sub-tab ${S.sub===null?'active':''}" onclick="selectSub(null)">全部</div>`;
+        subs.forEach(s => {
+          h += `<div class="sub-tab ${S.sub===s?'active':''}" onclick="selectSub('${esc(s)}')">${esc(s)}</div>`;
+        });
+        h += `</div>`;
+      }
 
-function exportPanel(){
-  let code=`// 疾管局 QA 知識庫 — 資料檔\n// 最後更新：${new Date().toLocaleDateString('zh-TW')}\nconst QA_DATA = ${JSON.stringify(D,null,2)};\n`;
-  return`<div class="ov" onclick="if(event.target===this){S.exportOpen=false;R()}"><div class="export-box">
-<h3>📥 匯出 data.js</h3>
-<p>把下面的內容<b>複製</b>後，到 GitHub 上編輯 <b>data.js</b> 檔案，全選貼上取代舊的，按 Commit 儲存。<br>同仁重新整理網頁就能看到最新資料。</p>
-<textarea id="exTA" readonly>${esc(code)}</textarea>
-<div class="export-btns"><button style="background:#f5f5f5;color:#666" onclick="S.exportOpen=false;R()">關閉</button><button style="background:#1a237e;color:#fff" onclick="document.getElementById('exTA').select();document.execCommand('copy');alert('已複製！')">📋 複製</button><button style="background:#2e7d32;color:#fff" onclick="let b=new Blob([genCode()],{type:'text/javascript'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='data.js';a.click()">💾 下載</button></div></div></div>`}
+      // Filter items
+      let items = cat.items;
+      if(S.sub) items = items.filter(it => it.sub === S.sub);
 
-function genCode(){return`// 疾管局 QA 知識庫 — 資料檔\n// 最後更新：${new Date().toLocaleDateString('zh-TW')}\nconst QA_DATA = ${JSON.stringify(D,null,2)};\n`}
+      if(items.length === 0){
+        h += `<div class="empty"><div class="big-icon">📭</div><p>這個分類還沒有QA內容</p></div>`;
+      } else {
+        items.forEach((item, _i) => {
+          const realIdx = cat.items.indexOf(item);
+          h += renderQACard(cat, item, realIdx, S.cat);
+        });
+      }
+    }
+  }
 
+  h += `</div></div>`; // end content, main
+
+  // --- MODALS ---
+  if(S.modal) h += renderModal();
+
+  app.innerHTML = h;
+
+  // Focus search
+  if(S.search){
+    const si = document.getElementById('si');
+    if(si){ si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
+  }
+}
+
+// ============================================================
+//  RENDER QA CARD
+// ============================================================
+function renderQACard(cat, item, idx, ci){
+  const isOpen = S.q === ci+'-'+idx;
+  const hlClass = item.highlight ? `hl-${item.highlight}` : '';
+  let h = `<div class="qa-card ${hlClass}" 
+    ${S.admin ? `draggable="true" ondragstart="dragQAStart(event,${ci},${idx})" ondragover="dragQAOver(event,this)" ondragleave="dragQALeave(this)" ondrop="dropQA(event,${ci},${idx})" ondragend="dragQAEnd()"` : ''}>`;
+  
+  h += `<div class="qa-q" onclick="toggleQ(${ci},${idx})">`;
+  if(S.admin) h += `<span class="qa-drag-handle" onclick="event.stopPropagation()">⋮⋮</span>`;
+  h += `<span class="arrow ${isOpen?'open':''}">▶</span>`;
+  h += `<span class="qa-q-text">${esc(item.q)}</span>`;
+  
+  // Tags
+  const tags = item.tags || [];
+  if(tags.length){
+    h += `<span class="qa-tags">`;
+    tags.forEach(t => { h += `<span class="tag tag-${t}">${t}</span>`; });
+    h += `</span>`;
+  }
+  h += `</div>`;
+
+  if(isOpen){
+    // Render answer with links and images
+    let aHtml = esc(item.a)
+      .replace(/\[圖片\](https?:\/\/[^\s]+)/g, '<br><img src="$1" alt="圖片" onclick="window.open(\'$1\',\'_blank\')">')
+      .replace(/\[影片\](https?:\/\/[^\s]+)/g, (m, url) => {
+        const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+        if(yt) return `<br><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px;margin:8px 0"></iframe>`;
+        return `<br><video controls src="${url}" style="max-width:100%;border-radius:8px;margin:8px 0"></video>`;
+      })
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    
+    h += `<div class="qa-a">${aHtml}</div>`;
+
+    // Admin tools
+    if(S.admin){
+      h += `<div style="padding:4px 16px 12px 42px">
+        <div class="admin-bar">
+          <button class="admin-btn" onclick="openEditQA(${ci},${idx})">✏️ 編輯</button>
+          <button class="admin-btn danger" onclick="deleteQA(${ci},${idx})">🗑 刪除</button>
+          <span style="color:var(--text3);margin:0 4px">│</span>
+          <span style="color:var(--text3);font-size:11px">標色：</span>
+          <div class="color-dots">
+            <div class="color-dot none ${!item.highlight?'active':''}" onclick="setHighlight(${ci},${idx},'')"></div>
+            ${['yellow','green','blue','red','purple','orange'].map(c =>
+              `<div class="color-dot ${item.highlight===c?'active':''}" style="background:${
+                {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
+              }" onclick="setHighlight(${ci},${idx},'${c}')"></div>`
+            ).join('')}
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+  h += `</div>`;
+  return h;
+}
+
+// ============================================================
+//  RENDER SEARCH
+// ============================================================
+function renderSearch(){
+  const term = S.search.trim().toLowerCase();
+  if(!term) return '';
+  let results = [];
+  D.categories.forEach((cat, ci) => {
+    cat.items.forEach((item, idx) => {
+      if(item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term)){
+        results.push({cat, ci, item, idx});
+      }
+    });
+  });
+  if(!results.length) return `<div class="empty"><div class="big-icon">🔍</div><p>找不到包含「${esc(S.search)}」的內容</p></div>`;
+  
+  let h = `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">找到 <b>${results.length}</b> 筆符合「<b>${esc(S.search)}</b>」的結果</div>`;
+  results.forEach(r => {
+    h += `<div style="margin-bottom:2px"><span class="search-result-cat">${r.cat.icon} ${esc(r.cat.name)}</span></div>`;
+    h += renderQACard(r.cat, r.item, r.idx, r.ci);
+  });
+  return h;
+}
+
+// ============================================================
+//  RENDER MODAL
+// ============================================================
+function renderModal(){
+  let h = `<div class="modal-ov" onclick="if(event.target===this){closeModal()}"><div class="modal">`;
+  const md = S.modalData;
+
+  if(S.modal === 'editQA' || S.modal === 'addQA'){
+    const isEdit = S.modal === 'editQA';
+    h += `<h3>${isEdit ? '✏️ 編輯QA' : '＋ 新增QA'}</h3>`;
+    
+    // Category select
+    h += `<label>所屬類別</label>`;
+    h += `<select id="mCat">`;
+    D.categories.forEach((c,i) => {
+      h += `<option value="${i}" ${md.ci===i?'selected':''}>${c.icon} ${esc(c.name)}</option>`;
+    });
+    h += `</select>`;
+
+    // Subtopic
+    const cat = D.categories[md.ci||0];
+    h += `<label>子分類</label>`;
+    h += `<select id="mSub">`;
+    (cat.subtopics||[]).forEach(s => {
+      h += `<option value="${esc(s)}" ${md.sub===s?'selected':''}>${esc(s)}</option>`;
+    });
+    h += `</select>`;
+
+    h += `<label>問題</label>`;
+    h += `<input id="mQ" value="${esc(md.q||'')}" placeholder="輸入問題...">`;
+
+    h += `<label>答案</label>`;
+    h += `<div style="display:flex;gap:6px;margin-bottom:4px">
+      <button class="admin-btn" onclick="insertMedia('image')">🖼 插入圖片網址</button>
+      <button class="admin-btn" onclick="insertMedia('video')">🎬 插入影片網址</button>
+      <button class="admin-btn" onclick="insertMedia('link')">🔗 插入連結</button>
+    </div>`;
+    h += `<textarea id="mA" placeholder="輸入答案...">${esc(md.a||'')}</textarea>`;
+
+    // Tags
+    h += `<label>標籤</label>`;
+    const allTags = ['重要','注意','新增','更新','常用'];
+    const curTags = md.tags || [];
+    h += `<div class="tag-picker">`;
+    allTags.forEach(t => {
+      h += `<div class="tag-opt tag-${t} ${curTags.includes(t)?'active':''}" onclick="toggleTag('${t}')">${t}</div>`;
+    });
+    h += `</div>`;
+
+    // Highlight
+    h += `<label>標記顏色</label>`;
+    h += `<div class="color-dots" style="margin-top:4px">
+      <div class="color-dot none ${!md.highlight?'active':''}" onclick="setModalHL('')"></div>
+      ${['yellow','green','blue','red','purple','orange'].map(c =>
+        `<div class="color-dot ${md.highlight===c?'active':''}" style="background:${
+          {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
+        }" onclick="setModalHL('${c}')"></div>`
+      ).join('')}
+    </div>`;
+
+    h += `<div class="modal-btns">
+      <button class="btn" onclick="closeModal()">取消</button>
+      ${isEdit ? `<button class="btn btn-danger" onclick="deleteQA(${md.ci},${md.idx});closeModal()">刪除</button>` : ''}
+      <button class="btn btn-primary" onclick="saveQA()">${isEdit ? '儲存修改' : '新增'}</button>
+    </div>`;
+  }
+
+  else if(S.modal === 'editCat'){
+    h += `<h3>✏️ 編輯類別</h3>`;
+    h += `<label>類別名稱</label>`;
+    h += `<input id="mCatName" value="${esc(md.name||'')}">`;
+    h += `<label>代表顏色</label>`;
+    h += `<input id="mCatColor" type="color" value="${md.color||'#0369a1'}" style="height:40px;cursor:pointer">`;
+    h += `<label>選擇圖示</label>`;
+    const icons = ['🦟','🔴','🤧','😷','🟡','🐀','🐕','🎀','💉','📞','🦠','🩹','🧪','🏥','🩺','💊','🧬','🫁','🧫','❤️','⚠️','📋','🔬','🛡️'];
+    h += `<div class="icon-grid">`;
+    icons.forEach(ic => {
+      h += `<div class="icon-opt ${md.icon===ic?'active':''}" onclick="S.modalData.icon='${ic}';R()">${ic}</div>`;
+    });
+    h += `</div>`;
+    h += `<label>子分類（每行一個）</label>`;
+    h += `<textarea id="mCatSubs" style="min-height:100px">${esc((md.subtopics||[]).join('\n'))}</textarea>`;
+    h += `<label>跑馬燈（每行一條，最多3條）</label>`;
+    h += `<textarea id="mCatMarquee" style="min-height:60px">${esc((md.marquee||[]).join('\n'))}</textarea>`;
+    h += `<div class="modal-btns">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveCat()">儲存</button>
+    </div>`;
+  }
+
+  else if(S.modal === 'addCat'){
+    h += `<h3>＋ 新增類別</h3>`;
+    h += `<label>類別名稱</label>`;
+    h += `<input id="mCatName" value="">`;
+    h += `<label>代表顏色</label>`;
+    h += `<input id="mCatColor" type="color" value="#0369a1" style="height:40px;cursor:pointer">`;
+    h += `<label>選擇圖示</label>`;
+    const icons2 = ['🦟','🔴','🤧','😷','🟡','🐀','🐕','🎀','💉','📞','🦠','🩹','🧪','🏥','🩺','💊','🧬','🫁','🧫','❤️','⚠️','📋','🔬','🛡️'];
+    h += `<div class="icon-grid">`;
+    icons2.forEach(ic => {
+      h += `<div class="icon-opt ${md.icon===ic?'active':''}" onclick="S.modalData.icon='${ic}';R()">${ic}</div>`;
+    });
+    h += `</div>`;
+    h += `<label>子分類（每行一個）</label>`;
+    h += `<textarea id="mCatSubs" style="min-height:80px" placeholder="例如：\n疾病介紹\n預防方式\n就醫指引"></textarea>`;
+    h += `<div class="modal-btns">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveNewCat()">新增</button>
+    </div>`;
+  }
+
+  else if(S.modal === 'catManager'){
+    h += `<h3>📂 類別管理</h3>`;
+    h += `<p style="font-size:13px;color:var(--text3);margin-bottom:12px">可以編輯、新增、刪除類別，或拖拉左側類別調整順序</p>`;
+    D.categories.forEach((c, ci) => {
+      h += `<div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border)">
+        <span style="font-size:20px">${c.icon}</span>
+        <span style="flex:1;font-size:14px;font-weight:500">${esc(c.name)}</span>
+        <span style="font-size:12px;color:var(--text3)">${c.items.length}題</span>
+        <button class="admin-btn" onclick="openEditCat(${ci})">✏️</button>
+        <button class="admin-btn danger" onclick="deleteCat(${ci})">🗑</button>
+      </div>`;
+    });
+    h += `<div class="modal-btns">
+      <button class="btn" onclick="closeModal()">關閉</button>
+      <button class="btn btn-primary" onclick="openModal('addCat')">＋ 新增類別</button>
+    </div>`;
+  }
+
+  else if(S.modal === 'export'){
+    h += `<h3>📥 匯出 data.js</h3>`;
+    h += `<p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">
+      把下面的內容<b>複製</b>後，到 GitHub 上編輯 <b>data.js</b> 檔案，全選貼上取代舊的，按 Commit 儲存。<br>
+      同仁重新整理網頁就能看到最新資料。
+    </p>`;
+    h += `<textarea id="exTA" readonly class="export-box">${esc(genCode())}</textarea>`;
+    h += `<div class="modal-btns">
+      <button class="btn" onclick="closeModal()">關閉</button>
+      <button class="btn" onclick="document.getElementById('exTA').select();document.execCommand('copy');alert('已複製到剪貼簿！')">📋 複製</button>
+      <button class="btn btn-success" onclick="downloadFile()">💾 下載 data.js</button>
+    </div>`;
+  }
+
+  else if(S.modal === 'password'){
+    h += `<h3>🔒 請輸入管理密碼</h3>`;
+    h += `<input id="mPw" type="password" placeholder="請輸入密碼..." onkeydown="if(event.key==='Enter')checkPw()" autofocus>`;
+    h += `<div class="modal-btns">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="checkPw()">確認</button>
+    </div>`;
+  }
+
+  h += `</div></div>`;
+  return h;
+}
+
+// ============================================================
+//  ACTIONS
+// ============================================================
+function selectCat(ci){ S.cat = ci; S.sub = null; S.q = null; S.search = ''; R(); }
+function selectSub(s){ S.sub = s; S.q = null; R(); }
+function toggleQ(ci, idx){ S.q = S.q === ci+'-'+idx ? null : ci+'-'+idx; R(); }
+
+function doSearch(v){ S.search = v; R(); }
+
+function toggleAdmin(){
+  if(S.admin){ S.admin = false; R(); return; }
+  if(S.adminPw){ S.admin = true; R(); return; }
+  S.modal = 'password'; S.modalData = {}; R();
+  setTimeout(()=>{ const el = document.getElementById('mPw'); if(el) el.focus(); }, 50);
+}
+
+function checkPw(){
+  const pw = document.getElementById('mPw')?.value;
+  if(pw === '1234'){ S.adminPw = true; S.admin = true; S.modal = null; R(); }
+  else { alert('密碼錯誤！'); }
+}
+
+function openModal(type){ S.modal = type; S.modalData = { ci: S.cat, tags: [], highlight: '' }; R(); }
+function closeModal(){ S.modal = null; S.modalData = {}; R(); }
+
+// --- QA CRUD ---
+function openEditQA(ci, idx){
+  const item = D.categories[ci].items[idx];
+  S.modal = 'editQA';
+  S.modalData = { ci, idx, q: item.q, a: item.a, sub: item.sub, tags: [...(item.tags||[])], highlight: item.highlight||'' };
+  R();
+}
+
+function saveQA(){
+  const ci = parseInt(document.getElementById('mCat').value);
+  const sub = document.getElementById('mSub').value;
+  const q = document.getElementById('mQ').value.trim();
+  const a = document.getElementById('mA').value.trim();
+  if(!q || !a){ alert('問題和答案都要填喔！'); return; }
+  const tags = S.modalData.tags || [];
+  const highlight = S.modalData.highlight || '';
+
+  if(S.modal === 'editQA'){
+    const origCi = S.modalData.ci;
+    const origIdx = S.modalData.idx;
+    if(origCi === ci){
+      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight };
+    } else {
+      D.categories[origCi].items.splice(origIdx, 1);
+      D.categories[ci].items.push({ q, a, sub, tags, highlight });
+    }
+  } else {
+    D.categories[ci].items.push({ q, a, sub, tags, highlight });
+  }
+  save(); closeModal();
+}
+
+function deleteQA(ci, idx){
+  const item = D.categories[ci].items[idx];
+  if(!confirm(`確定要刪除「${item.q}」嗎？`)) return;
+  D.categories[ci].items.splice(idx, 1);
+  S.q = null;
+  save(); R();
+}
+
+function setHighlight(ci, idx, color){
+  D.categories[ci].items[idx].highlight = color;
+  save(); R();
+}
+
+function toggleTag(tag){
+  const tags = S.modalData.tags || [];
+  const i = tags.indexOf(tag);
+  if(i >= 0) tags.splice(i,1); else tags.push(tag);
+  S.modalData.tags = tags;
+  R();
+}
+
+function setModalHL(c){ S.modalData.highlight = c; R(); }
+
+function insertMedia(type){
+  const ta = document.getElementById('mA');
+  if(!ta) return;
+  if(type === 'image'){
+    const url = prompt('請輸入圖片網址（https://...）：');
+    if(url) ta.value += `\n[圖片]${url}`;
+  } else if(type === 'video'){
+    const url = prompt('請輸入影片網址（YouTube 或其他影片連結）：');
+    if(url) ta.value += `\n[影片]${url}`;
+  } else {
+    const url = prompt('請輸入網址（https://...）：');
+    if(url) ta.value += `\n${url}`;
+  }
+}
+
+// --- CATEGORY CRUD ---
+function openEditCat(ci){
+  const cat = D.categories[ci];
+  S.modal = 'editCat';
+  S.modalData = { ci, name: cat.name, icon: cat.icon, color: cat.color, subtopics: [...(cat.subtopics||[])], marquee: [...(cat.marquee||[])] };
+  R();
+}
+
+function saveCat(){
+  const ci = S.modalData.ci;
+  const name = document.getElementById('mCatName').value.trim();
+  const color = document.getElementById('mCatColor').value;
+  const icon = S.modalData.icon || D.categories[ci].icon;
+  const subs = document.getElementById('mCatSubs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const marquee = document.getElementById('mCatMarquee').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,3);
+  if(!name){ alert('請輸入類別名稱'); return; }
+  D.categories[ci].name = name;
+  D.categories[ci].icon = icon;
+  D.categories[ci].color = color;
+  D.categories[ci].subtopics = subs;
+  D.categories[ci].marquee = marquee;
+  save(); S.modal = 'catManager'; S.modalData = {}; R();
+}
+
+function saveNewCat(){
+  const name = document.getElementById('mCatName').value.trim();
+  const color = document.getElementById('mCatColor').value;
+  const icon = S.modalData.icon || '📋';
+  const subs = document.getElementById('mCatSubs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!name){ alert('請輸入類別名稱'); return; }
+  D.categories.push({
+    id: 'cat_'+Date.now(), name, icon, color, marquee: [], subtopics: subs, items: []
+  });
+  save(); S.modal = 'catManager'; S.modalData = {}; R();
+}
+
+function deleteCat(ci){
+  const cat = D.categories[ci];
+  if(!confirm(`確定刪除「${cat.name}」？（內含${cat.items.length}題QA會一起刪除）`)) return;
+  D.categories.splice(ci, 1);
+  if(S.cat >= D.categories.length) S.cat = Math.max(0, D.categories.length - 1);
+  save(); R();
+}
+
+// --- DRAG: QA ---
+function dragQAStart(e, ci, idx){ S.dragQA = {ci, idx}; e.dataTransfer.effectAllowed = 'move'; }
+function dragQAOver(e, el){ e.preventDefault(); el.classList.add('drag-over'); }
+function dragQALeave(el){ el.classList.remove('drag-over'); }
+function dropQA(e, ci, idx){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(!S.dragQA || S.dragQA.ci !== ci) return;
+  const from = S.dragQA.idx;
+  if(from === idx) return;
+  const items = D.categories[ci].items;
+  const [moved] = items.splice(from, 1);
+  items.splice(idx, 0, moved);
+  S.dragQA = null;
+  save(); R();
+}
+function dragQAEnd(){ S.dragQA = null; document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over')); }
+
+// --- DRAG: CATEGORY ---
+function dragCatStart(e, ci){ S.dragCat = ci; e.dataTransfer.effectAllowed = 'move'; }
+function dragCatOver(e){ e.preventDefault(); }
+function dropCat(e, ci){
+  e.preventDefault();
+  if(S.dragCat === null || S.dragCat === ci) return;
+  const [moved] = D.categories.splice(S.dragCat, 1);
+  D.categories.splice(ci, 0, moved);
+  S.cat = ci;
+  S.dragCat = null;
+  save(); R();
+}
+function dragCatEnd(){ S.dragCat = null; }
+
+// --- EXPORT ---
+function doExport(){
+  S.modal = 'export'; S.modalData = {};
+  R();
+}
+
+function genCode(){
+  return `// ============================================================\n//  高雄疾管QA助手 — 資料檔\n//  更新方式：修改此檔案後上傳 GitHub，同仁重新整理網頁即可\n//  最後更新：${new Date().toLocaleDateString('zh-TW')}\n// ============================================================\n\nconst QA_DATA = ${JSON.stringify(D, null, 2)};\n`;
+}
+
+function downloadFile(){
+  const blob = new Blob([genCode()], {type:'text/javascript;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'data.js';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// --- RESET ---
+function resetData(){
+  if(!confirm('確定要重置所有資料嗎？（會恢復成預設資料）')) return;
+  D = JSON.parse(JSON.stringify(QA_DATA));
+  save(); R();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
 R();
-new MutationObserver(()=>{let si=document.getElementById('si');if(si&&S.search&&document.activeElement!==si){si.focus();si.setSelectionRange(si.value.length,si.value.length)}}).observe(document.getElementById('app'),{childList:true,subtree:true});
 </script>
 </body>
 </html>
