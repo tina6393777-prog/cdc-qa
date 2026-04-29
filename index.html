@@ -469,17 +469,28 @@ function renderModal(){
     (cat.subtopics||[]).forEach(s => { h += `<option value="${esc(s)}" ${md.sub===s?'selected':''}>${esc(s)}</option>`; });
     h += `</select>`;
     h += `<label>問題</label><input id="mQ" value="${esc(md.q||'')}" placeholder="輸入問題...">`;
-    h += `<label>答案</label>
-      <div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap">
-        <button class="admin-btn" onclick="triggerImageUpload()">📁 上傳圖片</button>
-        <button class="admin-btn" onclick="insertMedia('image')">🔗 貼圖片網址</button>
-        <button class="admin-btn" onclick="insertMedia('video')">🎬 插入影片</button>
-        <button class="admin-btn" onclick="insertMedia('link')">🔗 插入連結</button>
-        <button class="admin-btn" onclick="insertMedia('textcolor')">🎨 標色文字</button>
-        <input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
-      </div>
-      <div id="uploadPreview" style="margin-bottom:6px"></div>`;
-    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 上傳圖片或貼圖片網址會自動顯示圖片&#10;• 用 [連結:顯示名稱]網址 可建立可點選連結&#10;• 用 [[red:重要文字]] 可將部分文字標紅色&#10;  支援顏色：red blue green orange purple pink">${esc(md.a||'')}</textarea>`;
+    h += `<label>答案</label>`;
+    // 工具列 + 顏色標記按鈕
+    h += '<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;align-items:center">';
+    h += '<button class="admin-btn" onclick="triggerImageUpload()">📁 上傳圖片</button>';
+    h += '<button class="admin-btn" onclick="insertMedia(\'image\')">🔗 貼圖片網址</button>';
+    h += '<button class="admin-btn" onclick="insertMedia(\'video\')">🎬 插入影片</button>';
+    h += '<button class="admin-btn" onclick="insertMedia(\'link\')">🔗 插入連結</button>';
+    h += '<input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">';
+    h += '<span style="color:var(--text3);margin:0 2px">│</span>';
+    h += '<span style="font-size:12px;color:var(--text3)">選取文字點顏色：</span>';
+    h += '<div style="display:flex;gap:4px;align-items:center">';
+    var tcColors = [
+      {c:'red',bg:'#dc2626'},{c:'blue',bg:'#2563eb'},{c:'green',bg:'#16a34a'},
+      {c:'orange',bg:'#ea580c'},{c:'purple',bg:'#7c3aed'},{c:'pink',bg:'#db2777'}
+    ];
+    tcColors.forEach(function(x){
+      h += '<div style="width:22px;height:22px;border-radius:50%;background:'+x.bg+';cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;transition:.15s;border:2px solid transparent" onmouseover="this.style.transform=\'scale(1.25)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="applyTextColor(\''+x.c+'\')" title="'+x.c+'">A</div>';
+    });
+    h += '<div style="width:22px;height:22px;border-radius:50%;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);border:2px dashed var(--border2);transition:.15s" onmouseover="this.style.transform=\'scale(1.25)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="removeTextColor()" title="取消標色">✕</div>';
+    h += '</div></div>';
+    h += '<div id="uploadPreview" style="margin-bottom:6px"></div>';
+    h += '<textarea id="mA" placeholder="輸入答案...\n\n💡 小提示：\n• 上傳圖片或貼圖片網址會自動顯示圖片\n• 用 [連結:顯示名稱]網址 可建立可點選連結\n• 選取文字後點上方顏色圓點可標色">'+esc(md.a||'')+'</textarea>';
 
     // Tags
     h += `<label>標籤</label>`;
@@ -674,12 +685,46 @@ function insertMedia(type){
     if(!name) return;
     const url = prompt('請輸入連結網址（https://...）：');
     if(url) ta.value += `\n[連結:${name}]${url}`;
-  } else if(type === 'textcolor'){
-    const color = prompt('請輸入顏色：\nred（紅）、blue（藍）、green（綠）、orange（橘）、purple（紫）、pink（粉紅）');
-    if(!color) return;
-    const text = prompt('請輸入要標色的文字：');
-    if(text) ta.value += `[[${color}:${text}]]`;
   }
+}
+
+// --- 選取文字直接點顏色標記 ---
+function applyTextColor(color){
+  const ta = document.getElementById('mA');
+  if(!ta) return;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  if(start === end){
+    alert('請先在答案框中選取要標色的文字，再點顏色按鈕');
+    return;
+  }
+  const selected = ta.value.substring(start, end);
+  const before = ta.value.substring(0, start);
+  const after = ta.value.substring(end);
+  ta.value = before + '[[' + color + ':' + selected + ']]' + after;
+  // 游標放到標記後面
+  const newPos = start + color.length + selected.length + 5;
+  ta.focus();
+  ta.setSelectionRange(newPos, newPos);
+}
+
+function removeTextColor(){
+  const ta = document.getElementById('mA');
+  if(!ta) return;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  if(start === end){
+    alert('請先在答案框中選取包含 [[顏色:...]] 的文字，再點取消');
+    return;
+  }
+  const selected = ta.value.substring(start, end);
+  // 把選取範圍內的 [[color:text]] 還原成 text
+  const cleaned = selected.replace(/\[\[(red|blue|green|orange|purple|pink):([^\]]*)\]\]/g, '$2');
+  const before = ta.value.substring(0, start);
+  const after = ta.value.substring(end);
+  ta.value = before + cleaned + after;
+  ta.focus();
+  ta.setSelectionRange(start, start + cleaned.length);
 }
 
 // --- 圖片直接上傳（轉成 base64 嵌入） ---
