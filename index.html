@@ -42,6 +42,14 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.5}
 .search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;opacity:.5;color:var(--text)}
 
+/* === TEXT COLORS (字體顏色) === */
+.tc-red{color:#dc2626 !important}
+.tc-blue{color:#2563eb !important}
+.tc-green{color:#16a34a !important}
+.tc-orange{color:#ea580c !important}
+.tc-purple{color:#7c3aed !important}
+.tc-pink{color:#db2777 !important}
+
 /* === MARQUEE === */
 .marquee-bar{background:#fef3c7;color:#92400e;padding:8px 0;overflow:hidden;font-size:13px;font-weight:500;border-bottom:1px solid #fde68a}
 .marquee-inner{display:flex;animation:marqueeScroll 30s linear infinite;white-space:nowrap;gap:80px}
@@ -116,6 +124,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .color-dot.active{border-color:var(--text);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--text)}
 .color-dot.none{background:var(--bg2);border:2px dashed var(--border2);position:relative}
 .color-dot.none::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3)}
+.text-color-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900}
+.text-color-dot:hover{transform:scale(1.2)}
+.text-color-dot.active{border-color:var(--text);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--text)}
 
 /* === MODAL === */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -172,7 +183,23 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">
+  <!-- Search input lives OUTSIDE the re-rendered area so typing Chinese won't break -->
+  <div id="header-zone"></div>
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input id="si" type="text" placeholder="輸入關鍵字搜尋所有QA..." value="">
+      <button id="si-clear" class="search-clear" style="display:none">✕</button>
+    </div>
+  </div>
+  <div id="marquee-zone"></div>
+  <div class="main">
+    <div class="sidebar" id="sidebar-zone"></div>
+    <div class="content" id="content-zone"></div>
+  </div>
+  <div id="modal-zone"></div>
+</div>
 
 <script src="data.js"></script>
 <script>
@@ -182,45 +209,63 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 let D, S = {
   cat: 0, sub: null, q: null, search: '',
   admin: false, adminPw: false,
-  modal: null, // 'editQA','addQA','editCat','addCat','export','catManager'
-  modalData: {},
+  modal: null, modalData: {},
   dragQA: null, dragCat: null
 };
 
 function load(){
-  try {
-    const s = localStorage.getItem('kaohsiung_cdc_qa_v3');
-    if(s) { D = JSON.parse(s); return; }
-  } catch(e){}
+  try { const s = localStorage.getItem('kaohsiung_cdc_qa_v3'); if(s){ D = JSON.parse(s); return; } } catch(e){}
   D = JSON.parse(JSON.stringify(QA_DATA));
 }
 function save(){ localStorage.setItem('kaohsiung_cdc_qa_v3', JSON.stringify(D)); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
 load();
 
 // ============================================================
-//  RENDER
+//  SEARCH INPUT — 永遠不會被 innerHTML 覆蓋
+// ============================================================
+const siEl = document.getElementById('si');
+const siClear = document.getElementById('si-clear');
+let composing = false;
+
+siEl.addEventListener('compositionstart', () => { composing = true; });
+siEl.addEventListener('compositionend', (e) => {
+  composing = false;
+  S.search = e.target.value;
+  renderParts();
+});
+siEl.addEventListener('input', (e) => {
+  if(!composing){ S.search = e.target.value; renderParts(); }
+});
+siEl.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){ S.search = ''; siEl.value = ''; siEl.blur(); renderParts(); }
+});
+siClear.addEventListener('click', () => { S.search = ''; siEl.value = ''; renderParts(); });
+
+// ============================================================
+//  RENDER — 分區渲染，不碰搜尋框
 // ============================================================
 function R(){
-  const app = document.getElementById('app');
-  let h = '';
+  renderHeader();
+  renderMarquee();
+  renderParts();
+  renderModal2();
+}
 
-  // --- HEADER ---
-  h += `<div class="header">
-    <div class="header-top">
-      <div class="header-left">
-        <div class="logo">🏥</div>
-        <div class="header-info">
-          <h1>高雄疾管QA助手</h1>
-          <p>高雄市政府衛生局 疾病管制處</p>
-        </div>
+function renderHeader(){
+  let h = `<div class="header"><div class="header-top">
+    <div class="header-left">
+      <div class="logo">🏥</div>
+      <div class="header-info">
+        <h1>高雄疾管QA助手</h1>
+        <p>高雄市政府衛生局 疾病管制處</p>
       </div>
-      <div class="header-right">
-        <div class="header-contact">
-          <b>📞 防疫專線</b> 07-723-0250（24H）<br>
-          <b>🕐 服務時間</b> 週一至週五 08:30-17:30
-        </div>`;
+    </div>
+    <div class="header-right">
+      <div class="header-contact">
+        <b>📞 防疫專線</b> 07-723-0250（24H）<br>
+        <b>🕐 服務時間</b> 週一至週五 08:30-17:30
+      </div>`;
   if(S.admin){
     h += `<button class="header-btn" onclick="openModal('addQA')">＋ 新增QA</button>`;
     h += `<button class="header-btn" onclick="openModal('catManager')">📂 類別管理</button>`;
@@ -229,147 +274,151 @@ function R(){
   } else {
     h += `<button class="header-btn" onclick="toggleAdmin()">🔒 後台</button>`;
   }
-  h += `</div></div>`;
+  h += `</div></div></div>`;
+  document.getElementById('header-zone').innerHTML = h;
+}
 
-  // --- SEARCH ---
-  h += `<div class="search-bar"><div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input id="si" type="text" placeholder="輸入關鍵字搜尋所有QA..." value="${esc(S.search)}" oninput="doSearch(this.value)" onkeydown="if(event.key==='Escape'){doSearch('');this.blur()}">
-    ${S.search ? '<button class="search-clear" onclick="doSearch(\'\')">✕</button>' : ''}
-  </div></div>`;
-
-  // --- MARQUEE ---
+function renderMarquee(){
   const mqs = (D.globalMarquee||[]).concat(D.categories[S.cat]?.marquee||[]);
   if(mqs.length > 0){
     const doubled = mqs.concat(mqs);
-    h += `<div class="marquee-bar"><div class="marquee-inner">${doubled.map(m=>`<span>${esc(m)}</span>`).join('')}</div></div>`;
+    document.getElementById('marquee-zone').innerHTML = `<div class="marquee-bar"><div class="marquee-inner">${doubled.map(m=>`<span>${esc(m)}</span>`).join('')}</div></div>`;
+  } else {
+    document.getElementById('marquee-zone').innerHTML = '';
   }
+}
 
-  h += `</div>`; // end header
+function renderParts(){
+  // 更新清除按鈕
+  siClear.style.display = S.search ? 'block' : 'none';
 
-  // --- MAIN ---
-  h += `<div class="main">`;
-
-  // --- SIDEBAR ---
-  h += `<div class="sidebar">`;
+  // SIDEBAR
+  let sh = '';
   D.categories.forEach((c,ci) => {
     const active = ci === S.cat && !S.search ? 'active' : '';
-    h += `<div class="cat-item ${active}" onclick="selectCat(${ci})" 
+    sh += `<div class="cat-item ${active}" onclick="selectCat(${ci})"
       ${S.admin ? `draggable="true" ondragstart="dragCatStart(event,${ci})" ondragover="dragCatOver(event)" ondrop="dropCat(event,${ci})" ondragend="dragCatEnd()"` : ''}>`;
-    if(S.admin) h += `<span class="cat-drag-handle">⋮⋮</span>`;
-    h += `<div class="cat-icon" style="background:${c.color}20;color:${c.color}">${c.icon}</div>`;
-    h += `<span class="cat-name">${esc(c.name)}</span>`;
-    h += `<span class="cat-count">${c.items.length}</span>`;
-    h += `</div>`;
+    if(S.admin) sh += `<span class="cat-drag-handle">⋮⋮</span>`;
+    sh += `<div class="cat-icon" style="background:${c.color}20;color:${c.color}">${c.icon}</div>`;
+    sh += `<span class="cat-name">${esc(c.name)}</span>`;
+    sh += `<span class="cat-count">${c.items.length}</span></div>`;
   });
-  h += `</div>`;
+  document.getElementById('sidebar-zone').innerHTML = sh;
 
-  // --- CONTENT ---
-  h += `<div class="content">`;
-
+  // CONTENT
+  let ch = '';
   if(S.search.trim()){
-    // SEARCH MODE
-    h += renderSearch();
+    ch = renderSearch();
   } else {
-    // NORMAL MODE
     const cat = D.categories[S.cat];
     if(!cat){
-      h += `<div class="empty"><div class="big-icon">📂</div><p>請選擇左側的類別</p></div>`;
+      ch = `<div class="empty"><div class="big-icon">📂</div><p>請選擇左側的類別</p></div>`;
     } else {
-      // Subtopic tabs
       const subs = cat.subtopics || [];
       if(subs.length > 0){
-        h += `<div class="subtopic-tabs">`;
-        h += `<div class="sub-tab ${S.sub===null?'active':''}" onclick="selectSub(null)">全部</div>`;
-        subs.forEach(s => {
-          h += `<div class="sub-tab ${S.sub===s?'active':''}" onclick="selectSub('${esc(s)}')">${esc(s)}</div>`;
-        });
-        h += `</div>`;
+        ch += `<div class="subtopic-tabs">`;
+        ch += `<div class="sub-tab ${S.sub===null?'active':''}" onclick="selectSub(null)">全部</div>`;
+        subs.forEach(s => { ch += `<div class="sub-tab ${S.sub===s?'active':''}" onclick="selectSub('${esc(s)}')">${esc(s)}</div>`; });
+        ch += `</div>`;
       }
-
-      // Filter items
       let items = cat.items;
       if(S.sub) items = items.filter(it => it.sub === S.sub);
-
-      if(items.length === 0){
-        h += `<div class="empty"><div class="big-icon">📭</div><p>這個分類還沒有QA內容</p></div>`;
+      if(!items.length){
+        ch += `<div class="empty"><div class="big-icon">📭</div><p>這個分類還沒有QA內容</p></div>`;
       } else {
-        items.forEach((item, _i) => {
+        items.forEach(item => {
           const realIdx = cat.items.indexOf(item);
-          h += renderQACard(cat, item, realIdx, S.cat);
+          ch += renderQACard(cat, item, realIdx, S.cat);
         });
       }
     }
   }
+  document.getElementById('content-zone').innerHTML = ch;
+}
 
-  h += `</div></div>`; // end content, main
-
-  // --- MODALS ---
-  if(S.modal) h += renderModal();
-
-  app.innerHTML = h;
-
-  // Focus search
-  if(S.search){
-    const si = document.getElementById('si');
-    if(si){ si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
+function renderModal2(){
+  const zone = document.getElementById('modal-zone');
+  if(!S.modal){ zone.innerHTML = ''; return; }
+  zone.innerHTML = renderModal();
+  // auto focus password
+  if(S.modal === 'password'){
+    setTimeout(()=>{ const el = document.getElementById('mPw'); if(el) el.focus(); }, 50);
   }
 }
 
 // ============================================================
-//  RENDER QA CARD
+//  RENDER QA CARD — 含文字顏色 & 圖片直接顯示
 // ============================================================
 function renderQACard(cat, item, idx, ci){
   const isOpen = S.q === ci+'-'+idx;
   const hlClass = item.highlight ? `hl-${item.highlight}` : '';
-  let h = `<div class="qa-card ${hlClass}" 
+  const tcClass = item.textColor ? `tc-${item.textColor}` : '';
+  let h = `<div class="qa-card ${hlClass}"
     ${S.admin ? `draggable="true" ondragstart="dragQAStart(event,${ci},${idx})" ondragover="dragQAOver(event,this)" ondragleave="dragQALeave(this)" ondrop="dropQA(event,${ci},${idx})" ondragend="dragQAEnd()"` : ''}>`;
-  
-  h += `<div class="qa-q" onclick="toggleQ(${ci},${idx})">`;
+
+  h += `<div class="qa-q ${tcClass}" onclick="toggleQ(${ci},${idx})">`;
   if(S.admin) h += `<span class="qa-drag-handle" onclick="event.stopPropagation()">⋮⋮</span>`;
   h += `<span class="arrow ${isOpen?'open':''}">▶</span>`;
   h += `<span class="qa-q-text">${esc(item.q)}</span>`;
-  
-  // Tags
   const tags = item.tags || [];
   if(tags.length){
-    h += `<span class="qa-tags">`;
-    tags.forEach(t => { h += `<span class="tag tag-${t}">${t}</span>`; });
-    h += `</span>`;
+    h += `<span class="qa-tags">${tags.map(t=>`<span class="tag tag-${t}">${t}</span>`).join('')}</span>`;
   }
   h += `</div>`;
 
   if(isOpen){
-    // Render answer with links and images
-    let aHtml = esc(item.a)
-      .replace(/\[圖片\](https?:\/\/[^\s]+)/g, '<br><img src="$1" alt="圖片" onclick="window.open(\'$1\',\'_blank\')">')
-      .replace(/\[影片\](https?:\/\/[^\s]+)/g, (m, url) => {
-        const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
-        if(yt) return `<br><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px;margin:8px 0"></iframe>`;
-        return `<br><video controls src="${url}" style="max-width:100%;border-radius:8px;margin:8px 0"></video>`;
-      })
-      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-    
-    h += `<div class="qa-a">${aHtml}</div>`;
+    // 渲染答案：圖片直接顯示、影片嵌入、網址可點選
+    let aHtml = esc(item.a);
 
-    // Admin tools
+    // [圖片]URL → 直接顯示圖片
+    aHtml = aHtml.replace(/\[圖片\](https?:\/\/[^\s&lt;]+)/g,
+      '<div style="margin:10px 0"><img src="$1" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
+
+    // [影片]URL → 嵌入影片
+    aHtml = aHtml.replace(/\[影片\](https?:\/\/[^\s&lt;]+)/g, (m, url) => {
+      const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+      if(yt) return `<div style="margin:10px 0"><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`;
+      return `<div style="margin:10px 0"><video controls src="${url}" style="max-width:100%;border-radius:8px"></video></div>`;
+    });
+
+    // 偵測獨立的圖片網址（.jpg .jpeg .png .gif .webp .svg）直接顯示
+    aHtml = aHtml.replace(/(^|\n)(https?:\/\/[^\s&lt;]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s&lt;]*)?)(?=\s|$)/gim,
+      '$1<div style="margin:10px 0"><img src="$2" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
+
+    // 一般網址 → 可點選連結
+    aHtml = aHtml.replace(/(https?:\/\/[^\s<"]+)(?![^<]*<\/a>)(?![^"]*">)/g,
+      '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
+
+    h += `<div class="qa-a ${tcClass}">${aHtml}</div>`;
+
+    // 後台管理工具列
     if(S.admin){
-      h += `<div style="padding:4px 16px 12px 42px">
-        <div class="admin-bar">
-          <button class="admin-btn" onclick="openEditQA(${ci},${idx})">✏️ 編輯</button>
-          <button class="admin-btn danger" onclick="deleteQA(${ci},${idx})">🗑 刪除</button>
-          <span style="color:var(--text3);margin:0 4px">│</span>
-          <span style="color:var(--text3);font-size:11px">標色：</span>
-          <div class="color-dots">
-            <div class="color-dot none ${!item.highlight?'active':''}" onclick="setHighlight(${ci},${idx},'')"></div>
-            ${['yellow','green','blue','red','purple','orange'].map(c =>
-              `<div class="color-dot ${item.highlight===c?'active':''}" style="background:${
-                {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
-              }" onclick="setHighlight(${ci},${idx},'${c}')"></div>`
-            ).join('')}
-          </div>
+      h += `<div style="padding:4px 16px 12px 42px"><div class="admin-bar">
+        <button class="admin-btn" onclick="openEditQA(${ci},${idx})">✏️ 編輯</button>
+        <button class="admin-btn danger" onclick="deleteQA(${ci},${idx})">🗑 刪除</button>
+        <span style="color:var(--text3);margin:0 4px">│</span>
+        <span style="color:var(--text3);font-size:11px">背景色：</span>
+        <div class="color-dots">
+          <div class="color-dot none ${!item.highlight?'active':''}" onclick="setHighlight(${ci},${idx},'')"></div>
+          ${['yellow','green','blue','red','purple','orange'].map(c =>
+            `<div class="color-dot ${item.highlight===c?'active':''}" style="background:${
+              {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
+            }" onclick="setHighlight(${ci},${idx},'${c}')"></div>`
+          ).join('')}
         </div>
-      </div>`;
+        <span style="color:var(--text3);margin:0 4px">│</span>
+        <span style="color:var(--text3);font-size:11px">字體色：</span>
+        <div class="color-dots">
+          <div class="text-color-dot ${!item.textColor?'active':''}" style="background:#f1f5f9" onclick="setTextColor(${ci},${idx},'')">A</div>
+          ${['red','blue','green','orange','purple','pink'].map(c =>
+            `<div class="text-color-dot ${item.textColor===c?'active':''}" style="color:${
+              {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
+            };background:${
+              {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
+            }" onclick="setTextColor(${ci},${idx},'${c}')">A</div>`
+          ).join('')}
+        </div>
+      </div></div>`;
     }
   }
   h += `</div>`;
@@ -391,7 +440,7 @@ function renderSearch(){
     });
   });
   if(!results.length) return `<div class="empty"><div class="big-icon">🔍</div><p>找不到包含「${esc(S.search)}」的內容</p></div>`;
-  
+
   let h = `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">找到 <b>${results.length}</b> 筆符合「<b>${esc(S.search)}</b>」的結果</div>`;
   results.forEach(r => {
     h += `<div style="margin-bottom:2px"><span class="search-result-cat">${r.cat.icon} ${esc(r.cat.name)}</span></div>`;
@@ -410,55 +459,53 @@ function renderModal(){
   if(S.modal === 'editQA' || S.modal === 'addQA'){
     const isEdit = S.modal === 'editQA';
     h += `<h3>${isEdit ? '✏️ 編輯QA' : '＋ 新增QA'}</h3>`;
-    
-    // Category select
-    h += `<label>所屬類別</label>`;
-    h += `<select id="mCat">`;
-    D.categories.forEach((c,i) => {
-      h += `<option value="${i}" ${md.ci===i?'selected':''}>${c.icon} ${esc(c.name)}</option>`;
-    });
+    h += `<label>所屬類別</label><select id="mCat">`;
+    D.categories.forEach((c,i) => { h += `<option value="${i}" ${md.ci===i?'selected':''}>${c.icon} ${esc(c.name)}</option>`; });
     h += `</select>`;
-
-    // Subtopic
     const cat = D.categories[md.ci||0];
-    h += `<label>子分類</label>`;
-    h += `<select id="mSub">`;
-    (cat.subtopics||[]).forEach(s => {
-      h += `<option value="${esc(s)}" ${md.sub===s?'selected':''}>${esc(s)}</option>`;
-    });
+    h += `<label>子分類</label><select id="mSub">`;
+    (cat.subtopics||[]).forEach(s => { h += `<option value="${esc(s)}" ${md.sub===s?'selected':''}>${esc(s)}</option>`; });
     h += `</select>`;
-
-    h += `<label>問題</label>`;
-    h += `<input id="mQ" value="${esc(md.q||'')}" placeholder="輸入問題...">`;
-
-    h += `<label>答案</label>`;
-    h += `<div style="display:flex;gap:6px;margin-bottom:4px">
-      <button class="admin-btn" onclick="insertMedia('image')">🖼 插入圖片網址</button>
-      <button class="admin-btn" onclick="insertMedia('video')">🎬 插入影片網址</button>
-      <button class="admin-btn" onclick="insertMedia('link')">🔗 插入連結</button>
-    </div>`;
-    h += `<textarea id="mA" placeholder="輸入答案...">${esc(md.a||'')}</textarea>`;
+    h += `<label>問題</label><input id="mQ" value="${esc(md.q||'')}" placeholder="輸入問題...">`;
+    h += `<label>答案</label>
+      <div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+        <button class="admin-btn" onclick="insertMedia('image')">🖼 插入圖片網址</button>
+        <button class="admin-btn" onclick="insertMedia('video')">🎬 插入影片網址</button>
+        <button class="admin-btn" onclick="insertMedia('link')">🔗 插入連結</button>
+      </div>`;
+    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 一般網址會自動變成可點選的連結">${esc(md.a||'')}</textarea>`;
 
     // Tags
     h += `<label>標籤</label>`;
     const allTags = ['重要','注意','新增','更新','常用'];
     const curTags = md.tags || [];
-    h += `<div class="tag-picker">`;
-    allTags.forEach(t => {
-      h += `<div class="tag-opt tag-${t} ${curTags.includes(t)?'active':''}" onclick="toggleTag('${t}')">${t}</div>`;
-    });
-    h += `</div>`;
+    h += `<div class="tag-picker">${allTags.map(t =>
+      `<div class="tag-opt tag-${t} ${curTags.includes(t)?'active':''}" onclick="toggleTag('${t}')">${t}</div>`
+    ).join('')}</div>`;
 
-    // Highlight
-    h += `<label>標記顏色</label>`;
-    h += `<div class="color-dots" style="margin-top:4px">
-      <div class="color-dot none ${!md.highlight?'active':''}" onclick="setModalHL('')"></div>
-      ${['yellow','green','blue','red','purple','orange'].map(c =>
-        `<div class="color-dot ${md.highlight===c?'active':''}" style="background:${
-          {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
-        }" onclick="setModalHL('${c}')"></div>`
-      ).join('')}
-    </div>`;
+    // Highlight color
+    h += `<label>背景標色</label>
+      <div class="color-dots" style="margin-top:4px">
+        <div class="color-dot none ${!md.highlight?'active':''}" onclick="setModalHL('')"></div>
+        ${['yellow','green','blue','red','purple','orange'].map(c =>
+          `<div class="color-dot ${md.highlight===c?'active':''}" style="background:${
+            {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
+          }" onclick="setModalHL('${c}')"></div>`
+        ).join('')}
+      </div>`;
+
+    // Text color
+    h += `<label>字體顏色</label>
+      <div class="color-dots" style="margin-top:4px">
+        <div class="text-color-dot ${!md.textColor?'active':''}" style="background:#f1f5f9" onclick="setModalTC('')">A</div>
+        ${['red','blue','green','orange','purple','pink'].map(c =>
+          `<div class="text-color-dot ${md.textColor===c?'active':''}" style="color:${
+            {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
+          };background:${
+            {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
+          }" onclick="setModalTC('${c}')">A</div>`
+        ).join('')}
+      </div>`;
 
     h += `<div class="modal-btns">
       <button class="btn" onclick="closeModal()">取消</button>
@@ -469,21 +516,15 @@ function renderModal(){
 
   else if(S.modal === 'editCat'){
     h += `<h3>✏️ 編輯類別</h3>`;
-    h += `<label>類別名稱</label>`;
-    h += `<input id="mCatName" value="${esc(md.name||'')}">`;
-    h += `<label>代表顏色</label>`;
-    h += `<input id="mCatColor" type="color" value="${md.color||'#0369a1'}" style="height:40px;cursor:pointer">`;
+    h += `<label>類別名稱</label><input id="mCatName" value="${esc(md.name||'')}">`;
+    h += `<label>代表顏色</label><input id="mCatColor" type="color" value="${md.color||'#0369a1'}" style="height:40px;cursor:pointer">`;
     h += `<label>選擇圖示</label>`;
     const icons = ['🦟','🔴','🤧','😷','🟡','🐀','🐕','🎀','💉','📞','🦠','🩹','🧪','🏥','🩺','💊','🧬','🫁','🧫','❤️','⚠️','📋','🔬','🛡️'];
-    h += `<div class="icon-grid">`;
-    icons.forEach(ic => {
-      h += `<div class="icon-opt ${md.icon===ic?'active':''}" onclick="S.modalData.icon='${ic}';R()">${ic}</div>`;
-    });
-    h += `</div>`;
-    h += `<label>子分類（每行一個）</label>`;
-    h += `<textarea id="mCatSubs" style="min-height:100px">${esc((md.subtopics||[]).join('\n'))}</textarea>`;
-    h += `<label>跑馬燈（每行一條，最多3條）</label>`;
-    h += `<textarea id="mCatMarquee" style="min-height:60px">${esc((md.marquee||[]).join('\n'))}</textarea>`;
+    h += `<div class="icon-grid">${icons.map(ic =>
+      `<div class="icon-opt ${md.icon===ic?'active':''}" onclick="S.modalData.icon='${ic}';renderModal2()">${ic}</div>`
+    ).join('')}</div>`;
+    h += `<label>子分類（每行一個）</label><textarea id="mCatSubs" style="min-height:100px">${esc((md.subtopics||[]).join('\n'))}</textarea>`;
+    h += `<label>跑馬燈（每行一條，最多3條）</label><textarea id="mCatMarquee" style="min-height:60px">${esc((md.marquee||[]).join('\n'))}</textarea>`;
     h += `<div class="modal-btns">
       <button class="btn" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="saveCat()">儲存</button>
@@ -492,19 +533,14 @@ function renderModal(){
 
   else if(S.modal === 'addCat'){
     h += `<h3>＋ 新增類別</h3>`;
-    h += `<label>類別名稱</label>`;
-    h += `<input id="mCatName" value="">`;
-    h += `<label>代表顏色</label>`;
-    h += `<input id="mCatColor" type="color" value="#0369a1" style="height:40px;cursor:pointer">`;
+    h += `<label>類別名稱</label><input id="mCatName" value="">`;
+    h += `<label>代表顏色</label><input id="mCatColor" type="color" value="#0369a1" style="height:40px;cursor:pointer">`;
     h += `<label>選擇圖示</label>`;
     const icons2 = ['🦟','🔴','🤧','😷','🟡','🐀','🐕','🎀','💉','📞','🦠','🩹','🧪','🏥','🩺','💊','🧬','🫁','🧫','❤️','⚠️','📋','🔬','🛡️'];
-    h += `<div class="icon-grid">`;
-    icons2.forEach(ic => {
-      h += `<div class="icon-opt ${md.icon===ic?'active':''}" onclick="S.modalData.icon='${ic}';R()">${ic}</div>`;
-    });
-    h += `</div>`;
-    h += `<label>子分類（每行一個）</label>`;
-    h += `<textarea id="mCatSubs" style="min-height:80px" placeholder="例如：\n疾病介紹\n預防方式\n就醫指引"></textarea>`;
+    h += `<div class="icon-grid">${icons2.map(ic =>
+      `<div class="icon-opt ${md.icon===ic?'active':''}" onclick="S.modalData.icon='${ic}';renderModal2()">${ic}</div>`
+    ).join('')}</div>`;
+    h += `<label>子分類（每行一個）</label><textarea id="mCatSubs" style="min-height:80px" placeholder="例如：\n疾病介紹\n預防方式\n就醫指引"></textarea>`;
     h += `<div class="modal-btns">
       <button class="btn" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="saveNewCat()">新增</button>
@@ -533,9 +569,8 @@ function renderModal(){
     h += `<h3>📥 匯出 data.js</h3>`;
     h += `<p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">
       把下面的內容<b>複製</b>後，到 GitHub 上編輯 <b>data.js</b> 檔案，全選貼上取代舊的，按 Commit 儲存。<br>
-      同仁重新整理網頁就能看到最新資料。
-    </p>`;
-    h += `<textarea id="exTA" readonly class="export-box">${esc(genCode())}</textarea>`;
+      同仁重新整理網頁就能看到最新資料。</p>`;
+    h += `<textarea id="exTA" readonly style="width:100%;height:300px;font-family:Consolas,monospace;font-size:12px;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);resize:vertical">${esc(genCode())}</textarea>`;
     h += `<div class="modal-btns">
       <button class="btn" onclick="closeModal()">關閉</button>
       <button class="btn" onclick="document.getElementById('exTA').select();document.execCommand('copy');alert('已複製到剪貼簿！')">📋 複製</button>
@@ -545,7 +580,7 @@ function renderModal(){
 
   else if(S.modal === 'password'){
     h += `<h3>🔒 請輸入管理密碼</h3>`;
-    h += `<input id="mPw" type="password" placeholder="請輸入密碼..." onkeydown="if(event.key==='Enter')checkPw()" autofocus>`;
+    h += `<input id="mPw" type="password" placeholder="請輸入密碼..." onkeydown="if(event.key==='Enter')checkPw()">`;
     h += `<div class="modal-btns">
       <button class="btn" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="checkPw()">確認</button>
@@ -559,17 +594,14 @@ function renderModal(){
 // ============================================================
 //  ACTIONS
 // ============================================================
-function selectCat(ci){ S.cat = ci; S.sub = null; S.q = null; S.search = ''; R(); }
-function selectSub(s){ S.sub = s; S.q = null; R(); }
-function toggleQ(ci, idx){ S.q = S.q === ci+'-'+idx ? null : ci+'-'+idx; R(); }
-
-function doSearch(v){ S.search = v; R(); }
+function selectCat(ci){ S.cat = ci; S.sub = null; S.q = null; S.search = ''; siEl.value = ''; R(); }
+function selectSub(s){ S.sub = s; S.q = null; renderParts(); }
+function toggleQ(ci, idx){ S.q = S.q === ci+'-'+idx ? null : ci+'-'+idx; renderParts(); }
 
 function toggleAdmin(){
   if(S.admin){ S.admin = false; R(); return; }
   if(S.adminPw){ S.admin = true; R(); return; }
   S.modal = 'password'; S.modalData = {}; R();
-  setTimeout(()=>{ const el = document.getElementById('mPw'); if(el) el.focus(); }, 50);
 }
 
 function checkPw(){
@@ -578,15 +610,15 @@ function checkPw(){
   else { alert('密碼錯誤！'); }
 }
 
-function openModal(type){ S.modal = type; S.modalData = { ci: S.cat, tags: [], highlight: '' }; R(); }
-function closeModal(){ S.modal = null; S.modalData = {}; R(); }
+function openModal(type){ S.modal = type; S.modalData = { ci: S.cat, tags: [], highlight: '', textColor: '' }; R(); }
+function closeModal(){ S.modal = null; S.modalData = {}; renderModal2(); }
 
 // --- QA CRUD ---
 function openEditQA(ci, idx){
   const item = D.categories[ci].items[idx];
   S.modal = 'editQA';
-  S.modalData = { ci, idx, q: item.q, a: item.a, sub: item.sub, tags: [...(item.tags||[])], highlight: item.highlight||'' };
-  R();
+  S.modalData = { ci, idx, q: item.q, a: item.a, sub: item.sub, tags: [...(item.tags||[])], highlight: item.highlight||'', textColor: item.textColor||'' };
+  renderModal2();
 }
 
 function saveQA(){
@@ -597,33 +629,38 @@ function saveQA(){
   if(!q || !a){ alert('問題和答案都要填喔！'); return; }
   const tags = S.modalData.tags || [];
   const highlight = S.modalData.highlight || '';
+  const textColor = S.modalData.textColor || '';
 
   if(S.modal === 'editQA'){
     const origCi = S.modalData.ci;
     const origIdx = S.modalData.idx;
     if(origCi === ci){
-      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight };
+      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight, textColor };
     } else {
       D.categories[origCi].items.splice(origIdx, 1);
-      D.categories[ci].items.push({ q, a, sub, tags, highlight });
+      D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
     }
   } else {
-    D.categories[ci].items.push({ q, a, sub, tags, highlight });
+    D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
   }
-  save(); closeModal();
+  save(); S.modal = null; S.modalData = {}; R();
 }
 
 function deleteQA(ci, idx){
   const item = D.categories[ci].items[idx];
   if(!confirm(`確定要刪除「${item.q}」嗎？`)) return;
   D.categories[ci].items.splice(idx, 1);
-  S.q = null;
-  save(); R();
+  S.q = null; save(); R();
 }
 
 function setHighlight(ci, idx, color){
   D.categories[ci].items[idx].highlight = color;
-  save(); R();
+  save(); renderParts();
+}
+
+function setTextColor(ci, idx, color){
+  D.categories[ci].items[idx].textColor = color;
+  save(); renderParts();
 }
 
 function toggleTag(tag){
@@ -631,10 +668,11 @@ function toggleTag(tag){
   const i = tags.indexOf(tag);
   if(i >= 0) tags.splice(i,1); else tags.push(tag);
   S.modalData.tags = tags;
-  R();
+  renderModal2();
 }
 
-function setModalHL(c){ S.modalData.highlight = c; R(); }
+function setModalHL(c){ S.modalData.highlight = c; renderModal2(); }
+function setModalTC(c){ S.modalData.textColor = c; renderModal2(); }
 
 function insertMedia(type){
   const ta = document.getElementById('mA');
@@ -656,7 +694,7 @@ function openEditCat(ci){
   const cat = D.categories[ci];
   S.modal = 'editCat';
   S.modalData = { ci, name: cat.name, icon: cat.icon, color: cat.color, subtopics: [...(cat.subtopics||[])], marquee: [...(cat.marquee||[])] };
-  R();
+  renderModal2();
 }
 
 function saveCat(){
@@ -681,9 +719,7 @@ function saveNewCat(){
   const icon = S.modalData.icon || '📋';
   const subs = document.getElementById('mCatSubs').value.split('\n').map(s=>s.trim()).filter(Boolean);
   if(!name){ alert('請輸入類別名稱'); return; }
-  D.categories.push({
-    id: 'cat_'+Date.now(), name, icon, color, marquee: [], subtopics: subs, items: []
-  });
+  D.categories.push({ id: 'cat_'+Date.now(), name, icon, color, marquee: [], subtopics: subs, items: [] });
   save(); S.modal = 'catManager'; S.modalData = {}; R();
 }
 
@@ -700,16 +736,13 @@ function dragQAStart(e, ci, idx){ S.dragQA = {ci, idx}; e.dataTransfer.effectAll
 function dragQAOver(e, el){ e.preventDefault(); el.classList.add('drag-over'); }
 function dragQALeave(el){ el.classList.remove('drag-over'); }
 function dropQA(e, ci, idx){
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
   if(!S.dragQA || S.dragQA.ci !== ci) return;
-  const from = S.dragQA.idx;
-  if(from === idx) return;
+  const from = S.dragQA.idx; if(from === idx) return;
   const items = D.categories[ci].items;
   const [moved] = items.splice(from, 1);
   items.splice(idx, 0, moved);
-  S.dragQA = null;
-  save(); R();
+  S.dragQA = null; save(); R();
 }
 function dragQAEnd(){ S.dragQA = null; document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over')); }
 
@@ -721,17 +754,12 @@ function dropCat(e, ci){
   if(S.dragCat === null || S.dragCat === ci) return;
   const [moved] = D.categories.splice(S.dragCat, 1);
   D.categories.splice(ci, 0, moved);
-  S.cat = ci;
-  S.dragCat = null;
-  save(); R();
+  S.cat = ci; S.dragCat = null; save(); R();
 }
 function dragCatEnd(){ S.dragCat = null; }
 
 // --- EXPORT ---
-function doExport(){
-  S.modal = 'export'; S.modalData = {};
-  R();
-}
+function doExport(){ S.modal = 'export'; S.modalData = {}; R(); }
 
 function genCode(){
   return `// ============================================================\n//  高雄疾管QA助手 — 資料檔\n//  更新方式：修改此檔案後上傳 GitHub，同仁重新整理網頁即可\n//  最後更新：${new Date().toLocaleDateString('zh-TW')}\n// ============================================================\n\nconst QA_DATA = ${JSON.stringify(D, null, 2)};\n`;
@@ -742,15 +770,7 @@ function downloadFile(){
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'data.js';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-// --- RESET ---
-function resetData(){
-  if(!confirm('確定要重置所有資料嗎？（會恢復成預設資料）')) return;
-  D = JSON.parse(JSON.stringify(QA_DATA));
-  save(); R();
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ============================================================
