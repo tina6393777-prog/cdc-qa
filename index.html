@@ -42,7 +42,13 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.5}
 .search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;opacity:.5;color:var(--text)}
 
-/* === (已移除整段字體色，改用 [[color:文字]] 部分標色) === */
+/* === TEXT COLORS (字體顏色) === */
+.tc-red{color:#dc2626 !important}
+.tc-blue{color:#2563eb !important}
+.tc-green{color:#16a34a !important}
+.tc-orange{color:#ea580c !important}
+.tc-purple{color:#7c3aed !important}
+.tc-pink{color:#db2777 !important}
 
 /* === MARQUEE === */
 .marquee-bar{background:#fef3c7;color:#92400e;padding:8px 0;overflow:hidden;font-size:13px;font-weight:500;border-bottom:1px solid #fde68a}
@@ -83,7 +89,14 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .qa-q-text{flex:1}
 .qa-a{padding:0 16px 16px 42px;font-size:13.5px;line-height:1.8;color:var(--text2);white-space:pre-wrap;word-break:break-word}
 .qa-a a{color:var(--accent);text-decoration:underline}
-.qa-a img{max-width:100%;border-radius:8px;margin:8px 0;cursor:pointer}
+.qa-a img{max-width:100%;border-radius:8px;margin:8px 0;cursor:pointer;cursor:zoom-in;image-rendering:auto;-webkit-image-rendering:auto}
+
+/* === LIGHTBOX === */
+.lightbox-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:20px;animation:lbFadeIn .2s}
+.lightbox-ov img{max-width:95%;max-height:90vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.4);object-fit:contain;image-rendering:auto}
+.lightbox-close{position:fixed;top:16px;right:20px;color:#fff;font-size:32px;cursor:pointer;z-index:301;background:rgba(0,0,0,.4);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1}
+.lightbox-close:hover{background:rgba(255,255,255,.2)}
+@keyframes lbFadeIn{from{opacity:0}to{opacity:1}}
 
 /* === TAGS === */
 .qa-tags{display:flex;gap:4px;flex-shrink:0}
@@ -348,10 +361,11 @@ function renderModal2(){
 function renderQACard(cat, item, idx, ci){
   const isOpen = S.q === ci+'-'+idx;
   const hlClass = item.highlight ? `hl-${item.highlight}` : '';
+  const tcClass = item.textColor ? `tc-${item.textColor}` : '';
   let h = `<div class="qa-card ${hlClass}"
     ${S.admin ? `draggable="true" ondragstart="dragQAStart(event,${ci},${idx})" ondragover="dragQAOver(event,this)" ondragleave="dragQALeave(this)" ondrop="dropQA(event,${ci},${idx})" ondragend="dragQAEnd()"` : ''}>`;
 
-  h += `<div class="qa-q" onclick="toggleQ(${ci},${idx})">`;
+  h += `<div class="qa-q ${tcClass}" onclick="toggleQ(${ci},${idx})">`;
   if(S.admin) h += `<span class="qa-drag-handle" onclick="event.stopPropagation()">⋮⋮</span>`;
   h += `<span class="arrow ${isOpen?'open':''}">▶</span>`;
   h += `<span class="qa-q-text">${esc(item.q)}</span>`;
@@ -362,48 +376,29 @@ function renderQACard(cat, item, idx, ci){
   h += `</div>`;
 
   if(isOpen){
-    // 渲染答案：先拆分特殊語法，再安全處理純文字
-    const rawA = item.a || '';
-    let aHtml = '';
-    // 特殊語法：[圖片]url, [影片]url, [連結:名稱]url, [[color:文字]]
-    const specialRe = /(\[圖片\](?:https?:\/\/|data:image\/)\S+)|(\[影片\]https?:\/\/\S+)|(\[連結:([^\]]*)\](https?:\/\/\S+))|(\[\[(red|blue|green|orange|purple|pink):([^\]]*)\]\])/g;
-    let last = 0, match2;
-    const parts = [];
-    while((match2 = specialRe.exec(rawA)) !== null){
-      if(match2.index > last) parts.push({type:'text', val: rawA.slice(last, match2.index)});
-      if(match2[1]) parts.push({type:'image', val: match2[1].replace('[圖片]','')});
-      else if(match2[2]) parts.push({type:'video', val: match2[2].replace('[影片]','')});
-      else if(match2[3]) parts.push({type:'link', name: match2[4], url: match2[5]});
-      else if(match2[6]) parts.push({type:'color', color: match2[7], text: match2[8]});
-      last = match2.index + match2[0].length;
-    }
-    if(last < rawA.length) parts.push({type:'text', val: rawA.slice(last)});
+    // 渲染答案：圖片直接顯示、影片嵌入、網址可點選
+    let aHtml = esc(item.a);
 
-    parts.forEach(p => {
-      if(p.type === 'image'){
-        aHtml += `<div style="margin:10px 0"><img src="${p.val}" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);cursor:pointer" onclick="window.open(this.src,'_blank')"></div>`;
-      } else if(p.type === 'video'){
-        const yt = p.val.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
-        if(yt) aHtml += `<div style="margin:10px 0"><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`;
-        else aHtml += `<div style="margin:10px 0"><video controls src="${esc(p.val)}" style="max-width:100%;border-radius:8px"></video></div>`;
-      } else if(p.type === 'link'){
-        aHtml += `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">${esc(p.name)}</a>`;
-      } else if(p.type === 'color'){
-        const cMap = {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'};
-        aHtml += `<span style="color:${cMap[p.color]||p.color};font-weight:600">${esc(p.text)}</span>`;
-      } else {
-        let t = esc(p.val);
-        // 獨立圖片網址
-        t = t.replace(/(^|\n)(https?:\/\/[^\s&lt;]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s&lt;]*)?)(?=\s|$)/gim,
-          '$1<div style="margin:10px 0"><img src="$2" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
-        // 一般網址
-        t = t.replace(/(https?:\/\/[^\s<"&]+(?:&amp;[^\s<"&]+)*)(?![^<]*<\/a>)(?![^"]*">)/g,
-          '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
-        aHtml += t;
-      }
+    // [圖片]URL → 直接顯示圖片（支援 https 和 base64 data:）
+    aHtml = aHtml.replace(/\[圖片\]((?:https?:\/\/|data:image\/)[^\s&lt;]+)/g,
+      '<div style="margin:10px 0"><img src="$1" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
+
+    // [影片]URL → 嵌入影片
+    aHtml = aHtml.replace(/\[影片\](https?:\/\/[^\s&lt;]+)/g, (m, url) => {
+      const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+      if(yt) return `<div style="margin:10px 0"><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`;
+      return `<div style="margin:10px 0"><video controls src="${url}" style="max-width:100%;border-radius:8px"></video></div>`;
     });
 
-    h += `<div class="qa-a">${aHtml}</div>`;
+    // 偵測獨立的圖片網址（.jpg .jpeg .png .gif .webp .svg）直接顯示
+    aHtml = aHtml.replace(/(^|\n)(https?:\/\/[^\s&lt;]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s&lt;]*)?)(?=\s|$)/gim,
+      '$1<div style="margin:10px 0"><img src="$2" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
+
+    // 一般網址 → 可點選連結
+    aHtml = aHtml.replace(/(https?:\/\/[^\s<"]+)(?![^<]*<\/a>)(?![^"]*">)/g,
+      '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
+
+    h += `<div class="qa-a ${tcClass}">${aHtml}</div>`;
 
     // 後台管理工具列
     if(S.admin){
@@ -418,6 +413,18 @@ function renderQACard(cat, item, idx, ci){
             `<div class="color-dot ${item.highlight===c?'active':''}" style="background:${
               {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
             }" onclick="setHighlight(${ci},${idx},'${c}')"></div>`
+          ).join('')}
+        </div>
+        <span style="color:var(--text3);margin:0 4px">│</span>
+        <span style="color:var(--text3);font-size:11px">字體色：</span>
+        <div class="color-dots">
+          <div class="text-color-dot ${!item.textColor?'active':''}" style="background:#f1f5f9" onclick="setTextColor(${ci},${idx},'')">A</div>
+          ${['red','blue','green','orange','purple','pink'].map(c =>
+            `<div class="text-color-dot ${item.textColor===c?'active':''}" style="color:${
+              {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
+            };background:${
+              {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
+            }" onclick="setTextColor(${ci},${idx},'${c}')">A</div>`
           ).join('')}
         </div>
       </div></div>`;
@@ -469,28 +476,16 @@ function renderModal(){
     (cat.subtopics||[]).forEach(s => { h += `<option value="${esc(s)}" ${md.sub===s?'selected':''}>${esc(s)}</option>`; });
     h += `</select>`;
     h += `<label>問題</label><input id="mQ" value="${esc(md.q||'')}" placeholder="輸入問題...">`;
-    h += `<label>答案</label>`;
-    // 工具列 + 顏色標記按鈕
-    h += '<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;align-items:center">';
-    h += '<button class="admin-btn" onclick="triggerImageUpload()">📁 上傳圖片</button>';
-    h += '<button class="admin-btn" onclick="insertMedia(\'image\')">🔗 貼圖片網址</button>';
-    h += '<button class="admin-btn" onclick="insertMedia(\'video\')">🎬 插入影片</button>';
-    h += '<button class="admin-btn" onclick="insertMedia(\'link\')">🔗 插入連結</button>';
-    h += '<input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">';
-    h += '<span style="color:var(--text3);margin:0 2px">│</span>';
-    h += '<span style="font-size:12px;color:var(--text3)">選取文字點顏色：</span>';
-    h += '<div style="display:flex;gap:4px;align-items:center">';
-    var tcColors = [
-      {c:'red',bg:'#dc2626'},{c:'blue',bg:'#2563eb'},{c:'green',bg:'#16a34a'},
-      {c:'orange',bg:'#ea580c'},{c:'purple',bg:'#7c3aed'},{c:'pink',bg:'#db2777'}
-    ];
-    tcColors.forEach(function(x){
-      h += '<div style="width:22px;height:22px;border-radius:50%;background:'+x.bg+';cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;transition:.15s;border:2px solid transparent" onmouseover="this.style.transform=\'scale(1.25)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="applyTextColor(\''+x.c+'\')" title="'+x.c+'">A</div>';
-    });
-    h += '<div style="width:22px;height:22px;border-radius:50%;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);border:2px dashed var(--border2);transition:.15s" onmouseover="this.style.transform=\'scale(1.25)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="removeTextColor()" title="取消標色">✕</div>';
-    h += '</div></div>';
-    h += '<div id="uploadPreview" style="margin-bottom:6px"></div>';
-    h += '<textarea id="mA" placeholder="輸入答案...\n\n💡 小提示：\n• 上傳圖片或貼圖片網址會自動顯示圖片\n• 用 [連結:顯示名稱]網址 可建立可點選連結\n• 選取文字後點上方顏色圓點可標色">'+esc(md.a||'')+'</textarea>';
+    h += `<label>答案</label>
+      <div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+        <button class="admin-btn" onclick="triggerImageUpload()">📁 上傳圖片</button>
+        <button class="admin-btn" onclick="insertMedia('image')">🔗 貼圖片網址</button>
+        <button class="admin-btn" onclick="insertMedia('video')">🎬 插入影片</button>
+        <button class="admin-btn" onclick="insertMedia('link')">🔗 插入連結</button>
+        <input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
+      </div>
+      <div id="uploadPreview" style="margin-bottom:6px"></div>`;
+    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 一般網址會自動變成可點選的連結">${esc(md.a||'')}</textarea>`;
 
     // Tags
     h += `<label>標籤</label>`;
@@ -508,6 +503,19 @@ function renderModal(){
           `<div class="color-dot ${md.highlight===c?'active':''}" style="background:${
             {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
           }" onclick="setModalHL('${c}')"></div>`
+        ).join('')}
+      </div>`;
+
+    // Text color
+    h += `<label>字體顏色</label>
+      <div class="color-dots" style="margin-top:4px">
+        <div class="text-color-dot ${!md.textColor?'active':''}" style="background:#f1f5f9" onclick="setModalTC('')">A</div>
+        ${['red','blue','green','orange','purple','pink'].map(c =>
+          `<div class="text-color-dot ${md.textColor===c?'active':''}" style="color:${
+            {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
+          };background:${
+            {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
+          }" onclick="setModalTC('${c}')">A</div>`
         ).join('')}
       </div>`;
 
@@ -614,14 +622,14 @@ function checkPw(){
   else { alert('密碼錯誤！'); }
 }
 
-function openModal(type){ S.modal = type; S.modalData = { ci: S.cat, tags: [], highlight: '' }; R(); }
+function openModal(type){ S.modal = type; S.modalData = { ci: S.cat, tags: [], highlight: '', textColor: '' }; R(); }
 function closeModal(){ S.modal = null; S.modalData = {}; renderModal2(); }
 
 // --- QA CRUD ---
 function openEditQA(ci, idx){
   const item = D.categories[ci].items[idx];
   S.modal = 'editQA';
-  S.modalData = { ci, idx, q: item.q, a: item.a, sub: item.sub, tags: [...(item.tags||[])], highlight: item.highlight||'' };
+  S.modalData = { ci, idx, q: item.q, a: item.a, sub: item.sub, tags: [...(item.tags||[])], highlight: item.highlight||'', textColor: item.textColor||'' };
   renderModal2();
 }
 
@@ -633,18 +641,19 @@ function saveQA(){
   if(!q || !a){ alert('問題和答案都要填喔！'); return; }
   const tags = S.modalData.tags || [];
   const highlight = S.modalData.highlight || '';
+  const textColor = S.modalData.textColor || '';
 
   if(S.modal === 'editQA'){
     const origCi = S.modalData.ci;
     const origIdx = S.modalData.idx;
     if(origCi === ci){
-      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight };
+      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight, textColor };
     } else {
       D.categories[origCi].items.splice(origIdx, 1);
-      D.categories[ci].items.push({ q, a, sub, tags, highlight });
+      D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
     }
   } else {
-    D.categories[ci].items.push({ q, a, sub, tags, highlight });
+    D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
   }
   save(); S.modal = null; S.modalData = {}; R();
 }
@@ -661,6 +670,11 @@ function setHighlight(ci, idx, color){
   save(); renderParts();
 }
 
+function setTextColor(ci, idx, color){
+  D.categories[ci].items[idx].textColor = color;
+  save(); renderParts();
+}
+
 function toggleTag(tag){
   const tags = S.modalData.tags || [];
   const i = tags.indexOf(tag);
@@ -670,6 +684,7 @@ function toggleTag(tag){
 }
 
 function setModalHL(c){ S.modalData.highlight = c; renderModal2(); }
+function setModalTC(c){ S.modalData.textColor = c; renderModal2(); }
 
 function insertMedia(type){
   const ta = document.getElementById('mA');
@@ -680,51 +695,10 @@ function insertMedia(type){
   } else if(type === 'video'){
     const url = prompt('請輸入影片網址（YouTube 或其他影片連結）：');
     if(url) ta.value += `\n[影片]${url}`;
-  } else if(type === 'link'){
-    const name = prompt('請輸入連結的顯示名稱：\n（例如：衛福部官網）');
-    if(!name) return;
-    const url = prompt('請輸入連結網址（https://...）：');
-    if(url) ta.value += `\n[連結:${name}]${url}`;
+  } else {
+    const url = prompt('請輸入網址（https://...）：');
+    if(url) ta.value += `\n${url}`;
   }
-}
-
-// --- 選取文字直接點顏色標記 ---
-function applyTextColor(color){
-  const ta = document.getElementById('mA');
-  if(!ta) return;
-  const start = ta.selectionStart;
-  const end = ta.selectionEnd;
-  if(start === end){
-    alert('請先在答案框中選取要標色的文字，再點顏色按鈕');
-    return;
-  }
-  const selected = ta.value.substring(start, end);
-  const before = ta.value.substring(0, start);
-  const after = ta.value.substring(end);
-  ta.value = before + '[[' + color + ':' + selected + ']]' + after;
-  // 游標放到標記後面
-  const newPos = start + color.length + selected.length + 5;
-  ta.focus();
-  ta.setSelectionRange(newPos, newPos);
-}
-
-function removeTextColor(){
-  const ta = document.getElementById('mA');
-  if(!ta) return;
-  const start = ta.selectionStart;
-  const end = ta.selectionEnd;
-  if(start === end){
-    alert('請先在答案框中選取包含 [[顏色:...]] 的文字，再點取消');
-    return;
-  }
-  const selected = ta.value.substring(start, end);
-  // 把選取範圍內的 [[color:text]] 還原成 text
-  const cleaned = selected.replace(/\[\[(red|blue|green|orange|purple|pink):([^\]]*)\]\]/g, '$2');
-  const before = ta.value.substring(0, start);
-  const after = ta.value.substring(end);
-  ta.value = before + cleaned + after;
-  ta.focus();
-  ta.setSelectionRange(start, start + cleaned.length);
 }
 
 // --- 圖片直接上傳（轉成 base64 嵌入） ---
@@ -737,32 +711,69 @@ function handleImageUpload(input){
   const file = input.files[0];
   if(!file) return;
 
-  // 檢查檔案大小（限制 2MB）
-  if(file.size > 2 * 1024 * 1024){
-    alert('圖片太大了！請選擇 2MB 以下的圖片。\n\n💡 建議先用小畫家或手機縮小圖片再上傳。');
+  // 檢查檔案大小（限制 5MB）
+  if(file.size > 5 * 1024 * 1024){
+    alert('圖片太大了！請選擇 5MB 以下的圖片。\n\n💡 建議先用小畫家或手機縮小圖片再上傳。');
     input.value = '';
     return;
   }
 
   // 顯示上傳中的提示
   const preview = document.getElementById('uploadPreview');
-  if(preview) preview.innerHTML = '<span style="font-size:12px;color:var(--accent)">⏳ 圖片處理中...</span>';
+  if(preview) preview.innerHTML = '<span style="font-size:12px;color:var(--accent)">⏳ 圖片優化處理中...</span>';
 
   const reader = new FileReader();
   reader.onload = function(e){
-    const base64 = e.target.result;
-    const ta = document.getElementById('mA');
-    if(ta){
-      ta.value += `\n[圖片]${base64}`;
-    }
-    // 顯示預覽
-    if(preview){
-      preview.innerHTML = `<div style="margin:4px 0;padding:8px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
-        <div style="font-size:11px;color:var(--green);margin-bottom:4px">✅ 圖片已插入（${file.name}）</div>
-        <img src="${base64}" style="max-width:200px;max-height:120px;border-radius:6px">
-      </div>`;
-    }
-    input.value = '';
+    const img = new Image();
+    img.onload = function(){
+      // === 用 Canvas 優化圖片品質 ===
+      const MAX_W = 1400;  // 最大寬度
+      const MAX_H = 1400;  // 最大高度
+      const QUALITY = 0.92; // JPEG 品質（0.92 = 高畫質）
+
+      let w = img.width, h = img.height;
+
+      // 等比縮放（只縮小，不放大）
+      if(w > MAX_W){ h = Math.round(h * MAX_W / w); w = MAX_W; }
+      if(h > MAX_H){ w = Math.round(w * MAX_H / h); h = MAX_H; }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      // 開啟高品質渲染
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+
+      // 判斷用 PNG 還是 JPEG（有透明的用 PNG）
+      const isPNG = file.type === 'image/png';
+      let optimized;
+      if(isPNG && file.size < 500 * 1024){
+        // 小的 PNG 保持原格式（保留透明度）
+        optimized = canvas.toDataURL('image/png');
+      } else {
+        // 其他用 JPEG 高品質壓縮
+        optimized = canvas.toDataURL('image/jpeg', QUALITY);
+      }
+
+      const ta = document.getElementById('mA');
+      if(ta){
+        ta.value += `\n[圖片]${optimized}`;
+      }
+      // 顯示預覽 + 壓縮資訊
+      const origKB = Math.round(file.size / 1024);
+      const newKB = Math.round(optimized.length * 0.75 / 1024); // base64 → 實際大小
+      if(preview){
+        preview.innerHTML = `<div style="margin:4px 0;padding:8px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--green);margin-bottom:4px">✅ 圖片已插入（${file.name}，${w}×${h}px，${origKB}KB → ${newKB}KB）</div>
+          <img src="${optimized}" style="max-width:200px;max-height:120px;border-radius:6px">
+        </div>`;
+      }
+      input.value = '';
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -849,6 +860,38 @@ function downloadFile(){
   a.href = URL.createObjectURL(blob);
   a.download = 'data.js';
   a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ============================================================
+//  LIGHTBOX — 點擊圖片放大
+// ============================================================
+document.addEventListener('click', function(e){
+  // 點擊 QA 答案裡的圖片 → 開啟 lightbox
+  if(e.target.tagName === 'IMG' && e.target.closest('.qa-a')){
+    openLightbox(e.target.src);
+    return;
+  }
+  // 點擊 lightbox 背景或關閉鈕 → 關閉
+  if(e.target.closest('.lightbox-ov') || e.target.closest('.lightbox-close')){
+    closeLightbox();
+  }
+});
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeLightbox();
+});
+
+function openLightbox(src){
+  const div = document.createElement('div');
+  div.className = 'lightbox-ov';
+  div.id = 'lightbox';
+  div.innerHTML = `<div class="lightbox-close">✕</div><img src="${src}" alt="放大圖片">`;
+  document.body.appendChild(div);
+}
+
+function closeLightbox(){
+  const lb = document.getElementById('lightbox');
+  if(lb) lb.remove();
 }
 
 // ============================================================
