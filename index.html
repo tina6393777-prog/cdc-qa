@@ -369,27 +369,46 @@ function renderQACard(cat, item, idx, ci){
   h += `</div>`;
 
   if(isOpen){
-    // 渲染答案：圖片直接顯示、影片嵌入、網址可點選
-    let aHtml = esc(item.a);
+    // 渲染答案：先拆分特殊語法，再安全處理純文字
+    const rawA = item.a || '';
+    let aHtml = '';
+    // 特殊語法：[圖片]url, [影片]url, [連結:名稱]url, [[color:文字]]
+    const specialRe = /(\[圖片\](?:https?:\/\/|data:image\/)\S+)|(\[影片\]https?:\/\/\S+)|(\[連結:([^\]]*)\](https?:\/\/\S+))|(\[\[(red|blue|green|orange|purple|pink):([^\]]*)\]\])/g;
+    let last = 0, match2;
+    const parts = [];
+    while((match2 = specialRe.exec(rawA)) !== null){
+      if(match2.index > last) parts.push({type:'text', val: rawA.slice(last, match2.index)});
+      if(match2[1]) parts.push({type:'image', val: match2[1].replace('[圖片]','')});
+      else if(match2[2]) parts.push({type:'video', val: match2[2].replace('[影片]','')});
+      else if(match2[3]) parts.push({type:'link', name: match2[4], url: match2[5]});
+      else if(match2[6]) parts.push({type:'color', color: match2[7], text: match2[8]});
+      last = match2.index + match2[0].length;
+    }
+    if(last < rawA.length) parts.push({type:'text', val: rawA.slice(last)});
 
-    // [圖片]URL → 直接顯示圖片（支援 https 和 base64 data:）
-    aHtml = aHtml.replace(/\[圖片\]((?:https?:\/\/|data:image\/)[^\s&lt;]+)/g,
-      '<div style="margin:10px 0"><img src="$1" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
-
-    // [影片]URL → 嵌入影片
-    aHtml = aHtml.replace(/\[影片\](https?:\/\/[^\s&lt;]+)/g, (m, url) => {
-      const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
-      if(yt) return `<div style="margin:10px 0"><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`;
-      return `<div style="margin:10px 0"><video controls src="${url}" style="max-width:100%;border-radius:8px"></video></div>`;
+    parts.forEach(p => {
+      if(p.type === 'image'){
+        aHtml += `<div style="margin:10px 0"><img src="${p.val}" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);cursor:pointer" onclick="window.open(this.src,'_blank')"></div>`;
+      } else if(p.type === 'video'){
+        const yt = p.val.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+        if(yt) aHtml += `<div style="margin:10px 0"><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`;
+        else aHtml += `<div style="margin:10px 0"><video controls src="${esc(p.val)}" style="max-width:100%;border-radius:8px"></video></div>`;
+      } else if(p.type === 'link'){
+        aHtml += `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">${esc(p.name)}</a>`;
+      } else if(p.type === 'color'){
+        const cMap = {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'};
+        aHtml += `<span style="color:${cMap[p.color]||p.color};font-weight:600">${esc(p.text)}</span>`;
+      } else {
+        let t = esc(p.val);
+        // 獨立圖片網址
+        t = t.replace(/(^|\n)(https?:\/\/[^\s&lt;]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s&lt;]*)?)(?=\s|$)/gim,
+          '$1<div style="margin:10px 0"><img src="$2" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
+        // 一般網址
+        t = t.replace(/(https?:\/\/[^\s<"&]+(?:&amp;[^\s<"&]+)*)(?![^<]*<\/a>)(?![^"]*">)/g,
+          '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
+        aHtml += t;
+      }
     });
-
-    // 偵測獨立的圖片網址（.jpg .jpeg .png .gif .webp .svg）直接顯示
-    aHtml = aHtml.replace(/(^|\n)(https?:\/\/[^\s&lt;]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s&lt;]*)?)(?=\s|$)/gim,
-      '$1<div style="margin:10px 0"><img src="$2" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
-
-    // 一般網址 → 可點選連結
-    aHtml = aHtml.replace(/(https?:\/\/[^\s<"]+)(?![^<]*<\/a>)(?![^"]*">)/g,
-      '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
 
     h += `<div class="qa-a ${tcClass}">${aHtml}</div>`;
 
@@ -475,10 +494,11 @@ function renderModal(){
         <button class="admin-btn" onclick="insertMedia('image')">🔗 貼圖片網址</button>
         <button class="admin-btn" onclick="insertMedia('video')">🎬 插入影片</button>
         <button class="admin-btn" onclick="insertMedia('link')">🔗 插入連結</button>
+        <button class="admin-btn" onclick="insertMedia('textcolor')">🎨 標色文字</button>
         <input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
       </div>
       <div id="uploadPreview" style="margin-bottom:6px"></div>`;
-    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 一般網址會自動變成可點選的連結">${esc(md.a||'')}</textarea>`;
+    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 上傳圖片或貼圖片網址會自動顯示圖片&#10;• 用 [連結:顯示名稱]網址 可建立可點選連結&#10;• 用 [[red:重要文字]] 可將部分文字標紅色&#10;  支援顏色：red blue green orange purple pink">${esc(md.a||'')}</textarea>`;
 
     // Tags
     h += `<label>標籤</label>`;
@@ -688,9 +708,16 @@ function insertMedia(type){
   } else if(type === 'video'){
     const url = prompt('請輸入影片網址（YouTube 或其他影片連結）：');
     if(url) ta.value += `\n[影片]${url}`;
-  } else {
-    const url = prompt('請輸入網址（https://...）：');
-    if(url) ta.value += `\n${url}`;
+  } else if(type === 'link'){
+    const name = prompt('請輸入連結的顯示名稱：\n（例如：衛福部官網）');
+    if(!name) return;
+    const url = prompt('請輸入連結網址（https://...）：');
+    if(url) ta.value += `\n[連結:${name}]${url}`;
+  } else if(type === 'textcolor'){
+    const color = prompt('請輸入顏色：\nred（紅）、blue（藍）、green（綠）、orange（橘）、purple（紫）、pink（粉紅）');
+    if(!color) return;
+    const text = prompt('請輸入要標色的文字：');
+    if(text) ta.value += `[[${color}:${text}]]`;
   }
 }
 
