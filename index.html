@@ -42,13 +42,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.5}
 .search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;opacity:.5;color:var(--text)}
 
-/* === TEXT COLORS (字體顏色) === */
-.tc-red{color:#dc2626 !important}
-.tc-blue{color:#2563eb !important}
-.tc-green{color:#16a34a !important}
-.tc-orange{color:#ea580c !important}
-.tc-purple{color:#7c3aed !important}
-.tc-pink{color:#db2777 !important}
+/* === (已移除整段字體色，改用 [[color:文字]] 部分標色) === */
 
 /* === MARQUEE === */
 .marquee-bar{background:#fef3c7;color:#92400e;padding:8px 0;overflow:hidden;font-size:13px;font-weight:500;border-bottom:1px solid #fde68a}
@@ -354,11 +348,10 @@ function renderModal2(){
 function renderQACard(cat, item, idx, ci){
   const isOpen = S.q === ci+'-'+idx;
   const hlClass = item.highlight ? `hl-${item.highlight}` : '';
-  const tcClass = item.textColor ? `tc-${item.textColor}` : '';
   let h = `<div class="qa-card ${hlClass}"
     ${S.admin ? `draggable="true" ondragstart="dragQAStart(event,${ci},${idx})" ondragover="dragQAOver(event,this)" ondragleave="dragQALeave(this)" ondrop="dropQA(event,${ci},${idx})" ondragend="dragQAEnd()"` : ''}>`;
 
-  h += `<div class="qa-q ${tcClass}" onclick="toggleQ(${ci},${idx})">`;
+  h += `<div class="qa-q" onclick="toggleQ(${ci},${idx})">`;
   if(S.admin) h += `<span class="qa-drag-handle" onclick="event.stopPropagation()">⋮⋮</span>`;
   h += `<span class="arrow ${isOpen?'open':''}">▶</span>`;
   h += `<span class="qa-q-text">${esc(item.q)}</span>`;
@@ -410,7 +403,7 @@ function renderQACard(cat, item, idx, ci){
       }
     });
 
-    h += `<div class="qa-a ${tcClass}">${aHtml}</div>`;
+    h += `<div class="qa-a">${aHtml}</div>`;
 
     // 後台管理工具列
     if(S.admin){
@@ -425,18 +418,6 @@ function renderQACard(cat, item, idx, ci){
             `<div class="color-dot ${item.highlight===c?'active':''}" style="background:${
               {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
             }" onclick="setHighlight(${ci},${idx},'${c}')"></div>`
-          ).join('')}
-        </div>
-        <span style="color:var(--text3);margin:0 4px">│</span>
-        <span style="color:var(--text3);font-size:11px">字體色：</span>
-        <div class="color-dots">
-          <div class="text-color-dot ${!item.textColor?'active':''}" style="background:#f1f5f9" onclick="setTextColor(${ci},${idx},'')">A</div>
-          ${['red','blue','green','orange','purple','pink'].map(c =>
-            `<div class="text-color-dot ${item.textColor===c?'active':''}" style="color:${
-              {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
-            };background:${
-              {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
-            }" onclick="setTextColor(${ci},${idx},'${c}')">A</div>`
           ).join('')}
         </div>
       </div></div>`;
@@ -516,19 +497,6 @@ function renderModal(){
           `<div class="color-dot ${md.highlight===c?'active':''}" style="background:${
             {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
           }" onclick="setModalHL('${c}')"></div>`
-        ).join('')}
-      </div>`;
-
-    // Text color
-    h += `<label>字體顏色</label>
-      <div class="color-dots" style="margin-top:4px">
-        <div class="text-color-dot ${!md.textColor?'active':''}" style="background:#f1f5f9" onclick="setModalTC('')">A</div>
-        ${['red','blue','green','orange','purple','pink'].map(c =>
-          `<div class="text-color-dot ${md.textColor===c?'active':''}" style="color:${
-            {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
-          };background:${
-            {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
-          }" onclick="setModalTC('${c}')">A</div>`
         ).join('')}
       </div>`;
 
@@ -635,14 +603,14 @@ function checkPw(){
   else { alert('密碼錯誤！'); }
 }
 
-function openModal(type){ S.modal = type; S.modalData = { ci: S.cat, tags: [], highlight: '', textColor: '' }; R(); }
+function openModal(type){ S.modal = type; S.modalData = { ci: S.cat, tags: [], highlight: '' }; R(); }
 function closeModal(){ S.modal = null; S.modalData = {}; renderModal2(); }
 
 // --- QA CRUD ---
 function openEditQA(ci, idx){
   const item = D.categories[ci].items[idx];
   S.modal = 'editQA';
-  S.modalData = { ci, idx, q: item.q, a: item.a, sub: item.sub, tags: [...(item.tags||[])], highlight: item.highlight||'', textColor: item.textColor||'' };
+  S.modalData = { ci, idx, q: item.q, a: item.a, sub: item.sub, tags: [...(item.tags||[])], highlight: item.highlight||'' };
   renderModal2();
 }
 
@@ -654,19 +622,18 @@ function saveQA(){
   if(!q || !a){ alert('問題和答案都要填喔！'); return; }
   const tags = S.modalData.tags || [];
   const highlight = S.modalData.highlight || '';
-  const textColor = S.modalData.textColor || '';
 
   if(S.modal === 'editQA'){
     const origCi = S.modalData.ci;
     const origIdx = S.modalData.idx;
     if(origCi === ci){
-      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight, textColor };
+      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight };
     } else {
       D.categories[origCi].items.splice(origIdx, 1);
-      D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
+      D.categories[ci].items.push({ q, a, sub, tags, highlight });
     }
   } else {
-    D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
+    D.categories[ci].items.push({ q, a, sub, tags, highlight });
   }
   save(); S.modal = null; S.modalData = {}; R();
 }
@@ -683,11 +650,6 @@ function setHighlight(ci, idx, color){
   save(); renderParts();
 }
 
-function setTextColor(ci, idx, color){
-  D.categories[ci].items[idx].textColor = color;
-  save(); renderParts();
-}
-
 function toggleTag(tag){
   const tags = S.modalData.tags || [];
   const i = tags.indexOf(tag);
@@ -697,7 +659,6 @@ function toggleTag(tag){
 }
 
 function setModalHL(c){ S.modalData.highlight = c; renderModal2(); }
-function setModalTC(c){ S.modalData.textColor = c; renderModal2(); }
 
 function insertMedia(type){
   const ta = document.getElementById('mA');
