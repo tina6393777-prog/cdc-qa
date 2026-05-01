@@ -350,6 +350,16 @@ function renderModal2(){
   const zone = document.getElementById('modal-zone');
   if(!S.modal){ zone.innerHTML = ''; return; }
   zone.innerHTML = renderModal();
+
+  // 用 JS 安全設定值（避免 HTML 屬性被特殊字元截斷）
+  if(S.modal === 'editQA' || S.modal === 'addQA'){
+    const md = S.modalData;
+    const qEl = document.getElementById('mQ');
+    const aEl = document.getElementById('mA');
+    if(qEl) qEl.value = md.q || '';
+    if(aEl) aEl.value = md.a || '';
+  }
+
   // auto focus password
   if(S.modal === 'password'){
     setTimeout(()=>{ const el = document.getElementById('mPw'); if(el) el.focus(); }, 50);
@@ -512,7 +522,7 @@ function renderModal(){
     h += `<label>子分類</label><select id="mSub">`;
     (cat.subtopics||[]).forEach(s => { h += `<option value="${esc(s)}" ${md.sub===s?'selected':''}>${esc(s)}</option>`; });
     h += `</select>`;
-    h += `<label>問題</label><input id="mQ" value="${esc(md.q||'')}" placeholder="輸入問題...">`;
+    h += `<label>問題</label><input id="mQ" value="" placeholder="輸入問題...">`;
     h += `<label>答案</label>
       <div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap">
         <button class="admin-btn" onclick="triggerImageUpload()">📁 上傳圖片</button>
@@ -522,7 +532,7 @@ function renderModal(){
         <input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
       </div>
       <div id="uploadPreview" style="margin-bottom:6px"></div>`;
-    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 一般網址會自動變成可點選的連結">${esc(md.a||'')}</textarea>`;
+    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 一般網址會自動變成可點選的連結"></textarea>`;
 
     // Tags
     h += `<label>標籤</label>`;
@@ -671,28 +681,40 @@ function openEditQA(ci, idx){
 }
 
 function saveQA(){
-  const ci = parseInt(document.getElementById('mCat').value);
-  const sub = document.getElementById('mSub').value;
-  const q = document.getElementById('mQ').value.trim();
-  const a = document.getElementById('mA').value.trim();
-  if(!q || !a){ alert('問題和答案都要填喔！'); return; }
-  const tags = S.modalData.tags || [];
-  const highlight = S.modalData.highlight || '';
-  const textColor = S.modalData.textColor || '';
+  try {
+    const ciEl = document.getElementById('mCat');
+    const subEl = document.getElementById('mSub');
+    const qEl = document.getElementById('mQ');
+    const aEl = document.getElementById('mA');
 
-  if(S.modal === 'editQA'){
-    const origCi = S.modalData.ci;
-    const origIdx = S.modalData.idx;
-    if(origCi === ci){
-      D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight, textColor };
+    if(!qEl || !aEl){ alert('找不到輸入欄位，請重新開啟編輯視窗'); return; }
+
+    const ci = parseInt(ciEl.value);
+    const sub = subEl ? subEl.value : '';
+    const q = qEl.value.trim();
+    const a = aEl.value.trim();
+    if(!q || !a){ alert('問題和答案都要填喔！'); return; }
+    const tags = S.modalData.tags || [];
+    const highlight = S.modalData.highlight || '';
+    const textColor = S.modalData.textColor || '';
+
+    if(S.modal === 'editQA'){
+      const origCi = S.modalData.ci;
+      const origIdx = S.modalData.idx;
+      if(origCi === ci){
+        D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight, textColor };
+      } else {
+        D.categories[origCi].items.splice(origIdx, 1);
+        D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
+      }
     } else {
-      D.categories[origCi].items.splice(origIdx, 1);
       D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
     }
-  } else {
-    D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
+    save(); S.modal = null; S.modalData = {}; R();
+  } catch(e) {
+    alert('儲存時發生錯誤：' + e.message);
+    console.error('saveQA error:', e);
   }
-  save(); S.modal = null; S.modalData = {}; R();
 }
 
 function deleteQA(ci, idx){
