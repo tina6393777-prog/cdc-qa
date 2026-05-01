@@ -416,6 +416,11 @@ function renderQACard(cat, item, idx, ci){
       markers.push({ start: actualStart, end: actualStart + url.length, html: `<div style="margin:10px 0"><img src="${url}" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>` });
     });
 
+    // [連結:名稱]URL → 只顯示名稱的可點選連結
+    raw.replace(/\[連結:([^\]]+)\](https?:\/\/[^\s<]+)/g, (m, name, url, offset) => {
+      markers.push({ start: offset, end: offset + m.length, html: `<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;display:inline-flex;align-items:center;gap:3px">🔗 ${esc(name)}</a>` });
+    });
+
     // 排序 markers，避免重疊
     markers.sort((a, b) => a.start - b.start);
     const filtered = [];
@@ -532,7 +537,7 @@ function renderModal(){
         <input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
       </div>
       <div id="uploadPreview" style="margin-bottom:6px"></div>`;
-    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 一般網址會自動變成可點選的連結"></textarea>`;
+    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 用 [連結:名稱]網址 只顯示名稱，點了就開網頁&#10;• 一般網址會自動變成可點選的連結"></textarea>`;
 
     // Tags
     h += `<label>標籤</label>`;
@@ -755,8 +760,10 @@ function insertMedia(type){
     const url = prompt('請輸入影片網址（YouTube 或其他影片連結）：');
     if(url) ta.value += `\n[影片]${url}`;
   } else {
+    const name = prompt('請輸入連結名稱（例如：疾管署官網）：');
+    if(!name) return;
     const url = prompt('請輸入網址（https://...）：');
-    if(url) ta.value += `\n${url}`;
+    if(url) ta.value += `\n[連結:${name}]${url}`;
   }
 }
 
