@@ -372,11 +372,10 @@ function renderModal2(){
 function renderQACard(cat, item, idx, ci){
   const isOpen = S.q === ci+'-'+idx;
   const hlClass = item.highlight ? `hl-${item.highlight}` : '';
-  const tcClass = item.textColor ? `tc-${item.textColor}` : '';
   let h = `<div class="qa-card ${hlClass}"
     ${S.admin ? `draggable="true" ondragstart="dragQAStart(event,${ci},${idx})" ondragover="dragQAOver(event,this)" ondragleave="dragQALeave(this)" ondrop="dropQA(event,${ci},${idx})" ondragend="dragQAEnd()"` : ''}>`;
 
-  h += `<div class="qa-q ${tcClass}" onclick="toggleQ(${ci},${idx})">`;
+  h += `<div class="qa-q" onclick="toggleQ(${ci},${idx})">`;
   if(S.admin) h += `<span class="qa-drag-handle" onclick="event.stopPropagation()">⋮⋮</span>`;
   h += `<span class="arrow ${isOpen?'open':''}">▶</span>`;
   h += `<span class="qa-q-text">${esc(item.q)}</span>`;
@@ -450,7 +449,14 @@ function renderQACard(cat, item, idx, ci){
       aHtml += textPart;
     }
 
-    h += `<div class="qa-a ${tcClass}">${aHtml}</div>`;
+    // 局部文字標色：[紅]文字[/紅] → <span style="color:red">文字</span>
+    const colorMap = {'紅':'#dc2626','藍':'#2563eb','綠':'#16a34a','橘':'#ea580c','紫':'#7c3aed','粉':'#db2777'};
+    for(const [cn, cv] of Object.entries(colorMap)){
+      const re = new RegExp(`\\[${cn}\\](.*?)\\[/${cn}\\]`, 'gs');
+      aHtml = aHtml.replace(re, `<span style="color:${cv};font-weight:600">$1</span>`);
+    }
+
+    h += `<div class="qa-a">${aHtml}</div>`;
 
     // 後台管理工具列
     if(S.admin){
@@ -465,18 +471,6 @@ function renderQACard(cat, item, idx, ci){
             `<div class="color-dot ${item.highlight===c?'active':''}" style="background:${
               {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
             }" onclick="setHighlight(${ci},${idx},'${c}')"></div>`
-          ).join('')}
-        </div>
-        <span style="color:var(--text3);margin:0 4px">│</span>
-        <span style="color:var(--text3);font-size:11px">字體色：</span>
-        <div class="color-dots">
-          <div class="text-color-dot ${!item.textColor?'active':''}" style="background:#f1f5f9" onclick="setTextColor(${ci},${idx},'')">A</div>
-          ${['red','blue','green','orange','purple','pink'].map(c =>
-            `<div class="text-color-dot ${item.textColor===c?'active':''}" style="color:${
-              {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
-            };background:${
-              {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
-            }" onclick="setTextColor(${ci},${idx},'${c}')">A</div>`
           ).join('')}
         </div>
       </div></div>`;
@@ -537,7 +531,18 @@ function renderModal(){
         <input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
       </div>
       <div id="uploadPreview" style="margin-bottom:6px"></div>`;
-    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 用 [連結:名稱]網址 只顯示名稱，點了就開網頁&#10;• 一般網址會自動變成可點選的連結"></textarea>`;
+    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 用 [連結:名稱]網址 只顯示名稱，點了就開網頁&#10;• 選取文字後點下方顏色按鈕可局部標色"></textarea>`;
+
+    // 局部文字標色快捷按鈕
+    h += `<div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--text3)">🎨 選取文字後點顏色：</span>
+      <button type="button" class="admin-btn" style="color:#dc2626;font-weight:700" onclick="wrapColor('紅')">A 紅</button>
+      <button type="button" class="admin-btn" style="color:#2563eb;font-weight:700" onclick="wrapColor('藍')">A 藍</button>
+      <button type="button" class="admin-btn" style="color:#16a34a;font-weight:700" onclick="wrapColor('綠')">A 綠</button>
+      <button type="button" class="admin-btn" style="color:#ea580c;font-weight:700" onclick="wrapColor('橘')">A 橘</button>
+      <button type="button" class="admin-btn" style="color:#7c3aed;font-weight:700" onclick="wrapColor('紫')">A 紫</button>
+      <button type="button" class="admin-btn" style="color:#db2777;font-weight:700" onclick="wrapColor('粉')">A 粉</button>
+    </div>`;
 
     // Tags
     h += `<label>標籤</label>`;
@@ -555,19 +560,6 @@ function renderModal(){
           `<div class="color-dot ${md.highlight===c?'active':''}" style="background:${
             {yellow:'#fef9c3',green:'#dcfce7',blue:'#dbeafe',red:'#fee2e2',purple:'#f3e8ff',orange:'#ffedd5'}[c]
           }" onclick="setModalHL('${c}')"></div>`
-        ).join('')}
-      </div>`;
-
-    // Text color
-    h += `<label>字體顏色</label>
-      <div class="color-dots" style="margin-top:4px">
-        <div class="text-color-dot ${!md.textColor?'active':''}" style="background:#f1f5f9" onclick="setModalTC('')">A</div>
-        ${['red','blue','green','orange','purple','pink'].map(c =>
-          `<div class="text-color-dot ${md.textColor===c?'active':''}" style="color:${
-            {red:'#dc2626',blue:'#2563eb',green:'#16a34a',orange:'#ea580c',purple:'#7c3aed',pink:'#db2777'}[c]
-          };background:${
-            {red:'#fef2f2',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',pink:'#fdf2f8'}[c]
-          }" onclick="setModalTC('${c}')">A</div>`
         ).join('')}
       </div>`;
 
@@ -701,19 +693,18 @@ function saveQA(){
     if(!q || !a){ alert('問題和答案都要填喔！'); return; }
     const tags = S.modalData.tags || [];
     const highlight = S.modalData.highlight || '';
-    const textColor = S.modalData.textColor || '';
 
     if(S.modal === 'editQA'){
       const origCi = S.modalData.ci;
       const origIdx = S.modalData.idx;
       if(origCi === ci){
-        D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight, textColor };
+        D.categories[ci].items[origIdx] = { q, a, sub, tags, highlight };
       } else {
         D.categories[origCi].items.splice(origIdx, 1);
-        D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
+        D.categories[ci].items.push({ q, a, sub, tags, highlight });
       }
     } else {
-      D.categories[ci].items.push({ q, a, sub, tags, highlight, textColor });
+      D.categories[ci].items.push({ q, a, sub, tags, highlight });
     }
     save(); S.modal = null; S.modalData = {}; R();
   } catch(e) {
@@ -765,6 +756,28 @@ function insertMedia(type){
     const url = prompt('請輸入網址（https://...）：');
     if(url) ta.value += `\n[連結:${name}]${url}`;
   }
+}
+
+// --- 局部文字標色：選取文字後包上 [紅]...[/紅] 語法 ---
+function wrapColor(colorName){
+  const ta = document.getElementById('mA');
+  if(!ta) return;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const text = ta.value;
+
+  if(start === end){
+    alert('請先在答案欄位中「選取」要標色的文字，再點顏色按鈕。');
+    ta.focus();
+    return;
+  }
+  // 有選取文字 → 包住選取的部分
+  const selected = text.substring(start, end);
+  const wrapped = `[${colorName}]${selected}[/${colorName}]`;
+  ta.value = text.substring(0, start) + wrapped + text.substring(end);
+  ta.focus();
+  ta.selectionStart = start;
+  ta.selectionEnd = start + wrapped.length;
 }
 
 // --- 圖片直接上傳（自動壓縮後轉 base64 嵌入） ---
