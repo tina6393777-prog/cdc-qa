@@ -281,10 +281,11 @@ function renderHeader(){
 }
 
 function renderMarquee(){
-  const mqs = (D.globalMarquee||[]).concat(D.categories[S.cat]?.marquee||[]);
+  // 類別有自己的跑馬燈就優先用類別的，沒有才用全域的
+  const catMq = D.categories[S.cat]?.marquee || [];
+  const mqs = catMq.length > 0 ? catMq : (D.globalMarquee || []);
   if(mqs.length > 0){
-    const doubled = mqs.concat(mqs);
-    document.getElementById('marquee-zone').innerHTML = `<div class="marquee-bar"><div class="marquee-inner">${doubled.map(m=>`<span>${esc(m)}</span>`).join('')}</div></div>`;
+    document.getElementById('marquee-zone').innerHTML = `<div class="marquee-bar"><div class="marquee-inner">${mqs.map(m=>`<span>${esc(m)}</span>`).join('')}</div></div>`;
   } else {
     document.getElementById('marquee-zone').innerHTML = '';
   }
@@ -369,31 +370,63 @@ function renderQACard(cat, item, idx, ci){
   h += `</div>`;
 
   if(isOpen){
-    // 渲染答案：圖片直接顯示、影片嵌入、網址可點選
-    let aHtml = esc(item.a);
+    // 渲染答案：先在原始文字上處理圖片/影片/連結，再對純文字部分做 esc()
+    // 這樣 base64 data URI 和網址不會被 esc() 破壞
+    const raw = item.a;
+    const parts = [];
+    let last = 0;
 
-    // [圖片]URL → 直接顯示圖片（支援 https 和 base64 data:）
-    aHtml = aHtml.replace(/\[圖片\]((?:https?:\/\/|data:image\/)[^\s&lt;]+)/g,
-      '<div style="margin:10px 0"><img src="$1" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
+    // 收集所有特殊標記的位置（圖片、影片、網址）
+    const markers = [];
 
-    // [影片]URL → 嵌入影片
-    aHtml = aHtml.replace(/\[影片\](https?:\/\/[^\s&lt;]+)/g, (m, url) => {
-      const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
-      if(yt) return `<div style="margin:10px 0"><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`;
-      return `<div style="margin:10px 0"><video controls src="${url}" style="max-width:100%;border-radius:8px"></video></div>`;
+    // [圖片]URL（支援 https 和 base64 data:）
+    raw.replace(/\[圖片\]((?:https?:\/\/|data:image\/)[^\s<]+)/g, (m, url, offset) => {
+      markers.push({ start: offset, end: offset + m.length, html: `<div style="margin:10px 0"><img src="${url}" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>` });
     });
 
-    // 偵測獨立的圖片網址（.jpg .jpeg .png .gif .webp .svg）直接顯示
-    aHtml = aHtml.replace(/(^|\n)(https?:\/\/[^\s&lt;]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s&lt;]*)?)(?=\s|$)/gim,
-      '$1<div style="margin:10px 0"><img src="$2" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>');
+    // [影片]URL
+    raw.replace(/\[影片\](https?:\/\/[^\s<]+)/g, (m, url, offset) => {
+      const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+      let html;
+      if(yt) html = `<div style="margin:10px 0"><iframe width="100%" height="300" src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`;
+      else html = `<div style="margin:10px 0"><video controls src="${url}" style="max-width:100%;border-radius:8px"></video></div>`;
+      markers.push({ start: offset, end: offset + m.length, html });
+    });
 
-    // [連結:名稱]URL → 只顯示名稱的可點選連結
-    aHtml = aHtml.replace(/\[連結:([^\]]+)\](https?:\/\/[^\s&lt;]+)/g,
-      '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;display:inline-flex;align-items:center;gap:3px">🔗 $1</a>');
+    // 獨立的圖片網址（.jpg .jpeg .png .gif .webp .svg）
+    raw.replace(/(^|\n)(https?:\/\/[^\s<]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s<]*)?)(?=\s|$)/gim, (m, pre, url, offset) => {
+      const actualStart = offset + pre.length;
+      markers.push({ start: actualStart, end: actualStart + url.length, html: `<div style="margin:10px 0"><img src="${url}" alt="圖片" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>` });
+    });
 
-    // 一般網址 → 可點選連結
-    aHtml = aHtml.replace(/(https?:\/\/[^\s<"]+)(?![^<]*<\/a>)(?![^"]*">)/g,
-      '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
+    // 排序 markers，避免重疊
+    markers.sort((a, b) => a.start - b.start);
+    const filtered = [];
+    let maxEnd = 0;
+    for(const mk of markers){
+      if(mk.start >= maxEnd){ filtered.push(mk); maxEnd = mk.end; }
+    }
+
+    // 組合：特殊標記保留原始HTML，其餘文字做 esc() 後再處理一般網址
+    let aHtml = '';
+    let pos = 0;
+    for(const mk of filtered){
+      if(mk.start > pos){
+        let textPart = esc(raw.substring(pos, mk.start));
+        // 一般網址 → 可點選連結（在已 esc 的文字中處理）
+        textPart = textPart.replace(/(https?:\/\/[^\s<"&]+(?:&amp;[^\s<"&]*)*)/g,
+          '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
+        aHtml += textPart;
+      }
+      aHtml += mk.html;
+      pos = mk.end;
+    }
+    if(pos < raw.length){
+      let textPart = esc(raw.substring(pos));
+      textPart = textPart.replace(/(https?:\/\/[^\s<"&]+(?:&amp;[^\s<"&]*)*)/g,
+        '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">$1</a>');
+      aHtml += textPart;
+    }
 
     h += `<div class="qa-a ${tcClass}">${aHtml}</div>`;
 
@@ -482,7 +515,7 @@ function renderModal(){
         <input type="file" id="imgUploader" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
       </div>
       <div id="uploadPreview" style="margin-bottom:6px"></div>`;
-    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 用 [連結:名稱]網址 只顯示名稱，例如 [連結:疾管署]https://www.cdc.gov.tw&#10;• 一般網址會自動變成可點選的連結">${esc(md.a||'')}</textarea>`;
+    h += `<textarea id="mA" placeholder="輸入答案...&#10;&#10;💡 小提示：&#10;• 直接貼圖片網址（.jpg .png 結尾）會自動顯示圖片&#10;• 用 [圖片]網址 格式也可以&#10;• 一般網址會自動變成可點選的連結">${esc(md.a||'')}</textarea>`;
 
     // Tags
     h += `<label>標籤</label>`;
@@ -693,10 +726,8 @@ function insertMedia(type){
     const url = prompt('請輸入影片網址（YouTube 或其他影片連結）：');
     if(url) ta.value += `\n[影片]${url}`;
   } else {
-    const name = prompt('請輸入連結名稱（例如：疾管署官網）：');
-    if(!name) return;
     const url = prompt('請輸入網址（https://...）：');
-    if(url) ta.value += `\n[連結:${name}]${url}`;
+    if(url) ta.value += `\n${url}`;
   }
 }
 
